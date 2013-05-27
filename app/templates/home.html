@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+Welcome to BanglaDict!
+<p><a href="{% url app.views.words.recently_added %}">View recently added words</a></p>
+{% endblock %}
+

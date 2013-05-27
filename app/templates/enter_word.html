@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Enter New Word{% endblock %}
+{% block content %}
+<form action="{{request.get_full_path}}" method="POST" class="ModelForm">{% csrf_token %}
+<h2>Enter new word:</h2>
+<table>
+{{word_form}}
+{{definition_form}}
+</table>
+<button type="submit" name="Action" value="AddWord">Add Word</button>
+</form>
+{% endblock %}
