@@ -27,7 +27,7 @@ def index(request):
                     'english': request.POST['English']
                 })
 
-    return helpers.run_template(request, 'lookup', {
+    return helpers.run_template(request, 'home__lookup', {
     })
 
 

@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 
 import app.views.entry
+import app.views.help
 import app.views.home
 import app.views.lookup
 import app.views.words
@@ -13,6 +14,10 @@ urlpatterns = patterns('',
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
     (r'^words/request_new/$', app.views.words.request_new_word),
+
+    (r'^help/$', app.views.help.index),
+    (r'^help/(.*)/$', app.views.help.index),
+
 
     (r'^login/$', app.views.home.auth_login),
     (r'^logout/$', app.views.home.auth_logout),

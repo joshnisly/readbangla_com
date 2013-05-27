@@ -6,7 +6,6 @@ import helpers
 
 from app import models
 
-
 ################################# Entrypoints
 @login_required
 def enter_new_word(request):
@@ -27,7 +26,7 @@ def enter_new_word(request):
                                   notes=def_data['notes'],
                                   added_by=request.user)
 
-    return helpers.run_template(request, 'enter_word', {
+    return helpers.run_template(request, 'entry__enter_new_word', {
         'word_form': word_form,
         'definition_form': definition_form
     })
