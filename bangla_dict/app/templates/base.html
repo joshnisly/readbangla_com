@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} - BanglaDict</title>
+        <link rel="stylesheet" type="text/css" href="/static/invglobals.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/globals.css"/>
+    </head>
+    <body>
+        <div id="TabBar">
+            {% if request.user.is_authenticated %}
+            <span id="AuthSpan">
+                <span>Logged in as {{request.user.username}}.</span>
+                <a id="LogoutLink" href="/logout">(Log Out)</a>
+            </span>
+            {% endif %}
+            <ul>
+            {% for link in top_links %}
+            <li class="{% if link.0.lower == top_link_name %}Active{% endif %}">
+                <a href="{{link.1}}">{% if link.3 %} {{link.3}} {% else %} {{link.0}} {% endif %}</a>
+            </li>
+            {% endfor %}
+            </ul>
+            <div style="clear: both"></div>
+        </div>
+        {% if sub_links %}
+        <div id="SubTabBar">
+            <ul>
+            {% for link in sub_links %}
+            <li class="{% if link.0.lower == sub_link_name %}Active{% endif %}">
+                <a href="{{link.1}}">{{link.0}}</a>
+            </li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div id="Content">
+        {% block content %}
+        {% endblock %}
+        </div>
+    </body>
+</html>
