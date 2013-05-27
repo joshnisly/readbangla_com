@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 import django.db
 import django.db.transaction
 
-MY_USER = User.objects.get(username='bangla@joshnisly.com')
+MY_USER = models.get_automated_user('samsad')
 
 DEF1_REGEX = re.compile('\[m1\](.*?)\[/m\]')
 TAGS_REGEX = re.compile('\[.*?\](.*?)\[/.*?\]')

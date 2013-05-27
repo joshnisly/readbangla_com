@@ -2,6 +2,7 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 Welcome to BanglaDict!
+<p>There are currently {{num_words}} words in the dictionary.</p>
 <p><a href="{% url app.views.words.recently_added %}">View recently added words</a></p>
 {% endblock %}
 
