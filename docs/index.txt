@@ -1,0 +1,5 @@
+==Help==
+Ha! You thought that you were going to get help, did you?!? This is only an alpha release.
+
+'''Fortunately''', we had a ''wiki-like'' documentation system left over from an EMR project...
+

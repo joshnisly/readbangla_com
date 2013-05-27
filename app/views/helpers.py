@@ -61,6 +61,6 @@ def _get_page_structure():
             ('Enter New Word', reverse('app.views.entry.enter_new_word')),
             ('Enter New Definition', reverse('app.views.entry.enter_new_word')),
         ]),
-        ('Help', reverse('app.views.entry.enter_new_word'), []),
+        ('Help', reverse('app.views.help.index'), []),
     )
 

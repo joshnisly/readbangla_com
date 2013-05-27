@@ -16,7 +16,7 @@ def view_word_by_id(request, id_):
 
 def recently_added(request):
     words = models.Word.objects.order_by('-added_on')[:100]
-    return helpers.run_template(request, 'recent_words', {
+    return helpers.run_template(request, 'home__recently_added', {
         'words': words
     })
 
