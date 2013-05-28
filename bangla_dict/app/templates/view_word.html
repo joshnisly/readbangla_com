@@ -1,4 +1,4 @@
-{%extends "base.html" %}
+{% extends "base.html" %}
 
 {%block title %}{{word.word}}{% endblock %}
 
@@ -7,26 +7,12 @@
 
 <h3>Definitions:</h3>
 {% for definition in word.definitions.all %}
-<table>
-    <tr>
-        <td>English word:</td>
-        <td>{{definition.english_word}}</td>
-    </tr>
-    <tr>
-        <td>Part of speech:</td>
-        <td>{{definition.get_part_of_speech_display}}</td>
-    </tr>
-    <tr>
-        <td>Definition:</td>
-        <td style="white-space: pre-word">{{definition.definition}}</td>
-    </tr>
-    <tr>
-        <td>Notes:</td>
-        <td style="white-space: pre-word">{{definition.notes}}</td>
-    </tr>
-    <tr>
-        <td>Entered by:</td>
-        <td style="font-style: italic; font-size: 10pt">{{definition.added_by}} on {{definition.added_on}}</td>
-    </tr>
+<p>({{definition.get_part_of_speech_display}}) {{definition.english_word}}<br/>
+Definition: <span style="white-space: pre-word">{{definition.definition}}</span><br/>
+{% if definition.notes %}
+Notes: <span style="white-space: pre-word">{{definition.notes}}</span><br/>
+{% endif %}
+<span style="font-style: italic; font-size: 10pt">Entered by {{definition.added_by}} on {{definition.added_on}}</span>
+</p>
 {% endfor %}
 {% endblock %}
