@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+import urllib
 
 import helpers
 
@@ -11,12 +12,30 @@ from app import models
 
 ################################# Entrypoints
 def view_word(request, word_str):
-    word = get_object_or_404(models.Word, word=word_str)
-    return _word_entrypoint(request, word)
+    words = models.Word.objects.filter(word=word_str)
+    word = None
+    definitions = []
+    new_def_form = None
+    if len(words):
+        word = words[0]
 
-def view_word_by_id(request, id_):
-    word = get_object_or_404(models.Word, pk=id_)
-    return _word_entrypoint(request, word)
+        definitions = word.definitions.all()
+        if request.user.is_authenticated:
+            definitions = []
+            for definition in word.definitions.all():
+                definitions.append({
+                    'form': DefinitionForm(instance=definition),
+                    'definition': definition
+                })
+        new_def_form = DefinitionForm(initial={'word': word})
+
+    return helpers.run_template(request, 'view_word', {
+        'word': word,
+        'word_str': word_str,
+        'encoded_word_str': urllib.quote_plus(word_str.encode('utf-8')),
+        'definitions': definitions,
+        'new_def_form': new_def_form
+    })
 
 def recently_added(request):
     words = models.Word.objects.order_by('-added_on')[:100]
@@ -85,20 +104,6 @@ def delete_def(request):
 
 
 ################################ Internal
-def _word_entrypoint(request, word):
-    definitions = word.definitions.all()
-    if request.user.is_authenticated:
-        definitions = []
-        for definition in word.definitions.all():
-            definitions.append({
-                'form': DefinitionForm(instance=definition),
-                'definition': definition
-            })
-    return helpers.run_template(request, 'view_word', {
-        'word': word,
-        'definitions': definitions,
-        'new_def_form': DefinitionForm(initial={'word': word})
-    })
 
 class DefinitionForm(forms.ModelForm):
     class Meta:
