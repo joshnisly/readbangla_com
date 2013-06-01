@@ -3,16 +3,103 @@
 {%block title %}{{word.word}}{% endblock %}
 
 {% block content %}
-<p style="font-size: 26pt; margin: 0.1em 0">{{word.word}}</p>
+<style>
+.DefBtn
+{
+    padding: 0.15em 0.25em;
+}
+SELECT
+{
+    font-size: 10pt;
+}
+TEXTAREA
+{
+    width: 30em;
+    height: 10em;
+}
+.Definition .EditingSection,
+.Definition.Editing .ReadOnlySection
+{
+    display: none;
+}
+.Definition.Editing .EditingSection
+{
+    display: block;
+}
+.Definition .HideOptions,
+.Definition .OptionsDiv,
+.Definition.ShowingOptions .ShowOptions
+{
+    display: none;
+}
+.Definition.ShowingOptions .HideOptions
+{
+    display: inline;
+}
+.Definition.ShowingOptions .OptionsDiv
+{
+    display: block;
+}
+.HideOptions,
+.ShowOptions
+{
+    cursor: pointer;
+}
+</style>
+
+<p class="Bangla" style="font-size: 26pt; margin: 0.1em 0">{{word.word}}</p>
 
 <h3>Definitions:</h3>
-{% for definition in word.definitions.all %}
-<p>({{definition.get_part_of_speech_display}}) {{definition.english_word}}<br/>
-Definition: <span style="white-space: pre-word">{{definition.definition}}</span><br/>
-{% if definition.notes %}
-Notes: <span style="white-space: pre-word">{{definition.notes}}</span><br/>
+{% for definition in definitions %}
+<div class="Definition ShowingOptions" style="margin-bottom: 1em">
+<span class="ReadOnlySection">
+    ({{definition.definition.get_part_of_speech_display}})
+    {{definition.definition.english_word}}<br/>
+
+Definition: <span style="white-space: pre-word">{{definition.definition.definition}}</span><br/>
+{% if definition.definition.notes %}
+Notes: <span style="white-space: pre-word">{{definition.definition.notes}}</span><br/>
 {% endif %}
-<span style="font-style: italic; font-size: 10pt">Entered by {{definition.added_by}} on {{definition.added_on}}</span>
-</p>
+</span>
+<span class="EditingSection">
+<form action="{% url app.views.words.edit_def definition.definition.id %}" method="POST">{% csrf_token %}
+    ({{definition.form.part_of_speech}})
+    {{definition.form.english_word}}<br/>
+
+Definition: <br/>
+{{definition.form.definition}}<br/>
+Notes: <br/>
+{{definition.form.notes}}<br/>
+<button class="invBtn DefBtn" type="submit">Update</button>
+<button class="CancelEditBtn invBtn DefBtn" type="button">Cancel</button>
+</form>
+</span>
+<span style="font-style: italic; font-size: 10pt; vertical-align: top">
+    Entered by {{definition.definition.added_by}} on {{definition.definition.added_on}}
+{% if request.user == definition.definition.added_by or request.user.is_superuser %}
+    <img src="/static/menu-down.png" class="ShowOptions"/>
+    <img src="/static/menu-up.png" class="HideOptions"/>
+{% endif %}
+</span>
+{% if request.user == definition.definition.added_by or request.user.is_superuser %}
+<div class="OptionsDiv">
+    
+    <button class="EditBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Edit</button>
+    <button class="FlagBtn invBtn DefBtn" xdefid="{{definition.definition.id}}" title="Flag this definition for review">Flag</button>
+    <button class="DeleteBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Delete</button>
+</div>
+<div style="display: none">
+    <div class="FlagPrompt">
+        <p>Are you sure that you want to flag this question for review? This will record your name and the time that you requested review.</p>
+        <label>Reason for flagging:<br/><textarea id="FlagReasonInput"></textarea></label>
+    </div>
+    <div class="DeletePrompt">
+        <p>Are you <b>sure</b> that you want to flag this question for review? This action cannot be undone!</p>
+    </div>
+</dvi>
+{% endif %}
+</div>
 {% endfor %}
+<script type="text/javascript" src="/static/view_word.js"></script>
 {% endblock %}
+

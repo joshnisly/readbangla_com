@@ -25,8 +25,8 @@ class Definition(models.Model):
     parent_word = models.ForeignKey(Word, blank=True, null=True, related_name='children')
     part_of_speech = models.CharField(max_length=2, choices=PART_OF_SPEECH_CHOICES)
     english_word = models.CharField(max_length=50)
-    definition = models.TextField()
-    notes = models.TextField()
+    definition = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
 
     added_by = models.ForeignKey(auth_models.User)
     added_on = models.DateTimeField(auto_now_add=True)
@@ -35,6 +35,18 @@ class Definition(models.Model):
         return '%s (def added by %s on %s)' % (self.word.word, self.added_by,
                                                self.added_on)
 admin.site.register(Definition)
+
+class FlaggedDefinition(models.Model):
+    definition = models.ForeignKey(Definition)
+    reason = models.TextField()
+
+    flagged_by = models.ForeignKey(auth_models.User)
+    flagged_on = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return '%s (flagged by %s on %s)' % (self.definition.word.word, self.flagged_by,
+                                             self.flagged_on)
+admin.site.register(FlaggedDefinition)
 
 #class AudioRecording(models.Model):
 #    word = models.ForeignKey(Word)

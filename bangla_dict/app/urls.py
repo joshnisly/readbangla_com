@@ -15,6 +15,13 @@ urlpatterns = patterns('',
     (r'^words/lookup/$', app.views.lookup.index),
     (r'^words/request_new/$', app.views.words.request_new_word),
 
+    # Called only by form POSTs
+    (r'^words/edit_def/(\d+)/$', app.views.words.edit_def),
+
+    # Called by ajax
+    (r'^words/flag_def/$', app.views.words.flag_def),
+    (r'^words/delete_def/$', app.views.words.delete_def),
+
     (r'^help/$', app.views.help.index),
     (r'^help/(.*)/$', app.views.help.index),
 
