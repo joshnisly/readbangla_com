@@ -17,6 +17,7 @@ urlpatterns = patterns('',
 
     # Called only by form POSTs
     (r'^words/edit_def/(\d+)/$', app.views.words.edit_def),
+    (r'^words/add_def/(\d+)/$', app.views.words.add_def),
 
     # Called by ajax
     (r'^words/flag_def/$', app.views.words.flag_def),

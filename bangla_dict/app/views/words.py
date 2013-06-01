@@ -43,6 +43,22 @@ def edit_def(request, def_id):
     return HttpResponseRedirect(reverse(view_word, args=[word_def.word.word]))
 
 @login_required
+def add_def(request, word_id):
+    assert request.method == 'POST'
+
+    word = get_object_or_404(models.Word, pk=word_id)
+
+    form = DefinitionForm(request.POST)
+    if not form.is_valid():
+        print form.errors
+        assert False
+    instance = form.save(commit=False)
+    instance.word = word
+    instance.added_by = request.user
+    instance.save()
+    return HttpResponseRedirect(reverse(view_word, args=[word.word]))
+
+@login_required
 @helpers.json_entrypoint
 def flag_def(request):
     assert request.method == 'POST'
@@ -59,7 +75,13 @@ def flag_def(request):
 @helpers.json_entrypoint
 def delete_def(request):
     assert request.method == 'POST'
-    return {}
+
+    def_id = request.JSON['def_id']
+    word_def = get_object_or_404(models.Definition, pk=def_id)
+    assert word_def.added_by == request.user or request.user.is_superuser
+
+    word_def.delete()
+    return {'success': True}
 
 
 ################################ Internal
@@ -74,10 +96,12 @@ def _word_entrypoint(request, word):
             })
     return helpers.run_template(request, 'view_word', {
         'word': word,
-        'definitions': definitions
+        'definitions': definitions,
+        'new_def_form': DefinitionForm(initial={'word': word})
     })
 
 class DefinitionForm(forms.ModelForm):
     class Meta:
         model = models.Definition
-        exclude = ('word', 'added_by', 'added_on')
+        exclude = ('word', 'parent_word', 'added_by', 'added_on')
+
