@@ -33,6 +33,12 @@ H5
     margin-top: 0.25em;
 }
 
+.Message
+{
+    color: green;
+    font-weight: bold;
+}
+
 .Bangla
 {
     font-family: Lohit Bengali, Verdana, Arial, sans-serif;

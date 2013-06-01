@@ -1,8 +1,11 @@
 from django.contrib.auth.decorators import login_required
 
+from django.core.urlresolvers import reverse
 from django import forms
+from django.http import HttpResponseRedirect
 
 import helpers
+import words
 
 from app import models
 
@@ -25,6 +28,9 @@ def enter_new_word(request):
                                   definition=def_data['definition'],
                                   notes=def_data['notes'],
                                   added_by=request.user)
+
+            return HttpResponseRedirect(reverse(words.view_word,
+                                                args=[word.word]))
 
     return helpers.run_template(request, 'entry__enter_new_word', {
         'word_form': word_form,

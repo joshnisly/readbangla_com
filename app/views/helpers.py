@@ -2,7 +2,7 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.template import Context, RequestContext, loader
-
+import json
 
 
 def run_template(request, template_name, parms,
@@ -50,6 +50,27 @@ def run_template(request, template_name, parms,
         response['Content-Type'] = content_type 
     return response
 
+def json_entrypoint(func):
+    def wrap(request, *a, **kw):
+        try:
+            body = request.body
+        except AttributeError:
+            body = request.raw_post_data
+        request.JSON = json.loads(body)
+        try:
+            response = func(request, *a, **kw)
+        except Exception, e:
+            response = {'error': str(e)}
+        else:
+            if isinstance(response, HttpResponse):
+                return response
+
+        json_str = json.dumps(response)
+        return HttpResponse(json_str, mimetype='text/javascript')
+    return wrap
+
+
+############################### Internals
 def _get_page_structure():
     return (
         ('Home', '/', [
