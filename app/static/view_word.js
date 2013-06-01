@@ -31,8 +31,7 @@ function showFlagLightbox(event)
             }
         });
     }
-    var promptElem = $(event.target).closest('.Definition').find('.FlagPrompt')
-    showPromptLightbox('Flag for review', 'Flag', promptElem, flagAjax);
+    showPromptLightbox('Flag for review', 'Flag', $('#FlagPrompt'), flagAjax);
 }
 
 function showDeleteLightbox(event)
@@ -50,8 +49,7 @@ function showDeleteLightbox(event)
             }
         });
     }
-    var promptElem = $(event.target).closest('.Definition').find('.DeletePrompt')
-    showPromptLightbox('Delete definition', 'Delete', promptElem, deleteAjax);
+    showPromptLightbox('Delete definition', 'Delete', $('#DeletePrompt'), deleteAjax);
 }
 
 $(document).ready(function() {
@@ -75,4 +73,9 @@ $(document).ready(function() {
 
     // Delete
     $('.DeleteBtn').bind('click', showDeleteLightbox);
+
+    $('#AddDefBtn').bind('click', function(event) {
+        $('#AddDefBtn').hide();
+        $('#AddNewDefinitionWrapper').show();
+    });
 });

@@ -51,55 +51,73 @@ TEXTAREA
 
 <h3>Definitions:</h3>
 {% for definition in definitions %}
-<div class="Definition ShowingOptions" style="margin-bottom: 1em">
-<span class="ReadOnlySection">
-    ({{definition.definition.get_part_of_speech_display}})
-    {{definition.definition.english_word}}<br/>
+<div class="Definition" style="margin-bottom: 1em">
+    <span class="ReadOnlySection">
+        ({{definition.definition.get_part_of_speech_display}})
+        {{definition.definition.english_word}}<br/>
 
-Definition: <span style="white-space: pre-word">{{definition.definition.definition}}</span><br/>
-{% if definition.definition.notes %}
-Notes: <span style="white-space: pre-word">{{definition.definition.notes}}</span><br/>
-{% endif %}
-</span>
-<span class="EditingSection">
-<form action="{% url app.views.words.edit_def definition.definition.id %}" method="POST">{% csrf_token %}
-    ({{definition.form.part_of_speech}})
-    {{definition.form.english_word}}<br/>
+        Definition: <span style="white-space: pre-word">{{definition.definition.definition}}</span><br/>
+        {% if definition.definition.notes %}
+        Notes: <span style="white-space: pre-word">{{definition.definition.notes}}</span><br/>
+        {% endif %}
+    </span>
+    <span class="EditingSection">
+        <form action="{% url app.views.words.edit_def definition.definition.id %}" method="POST">{% csrf_token %}
+            ({{definition.form.part_of_speech}})
+            {{definition.form.english_word}}<br/>
 
-Definition: <br/>
-{{definition.form.definition}}<br/>
-Notes: <br/>
-{{definition.form.notes}}<br/>
-<button class="invBtn DefBtn" type="submit">Update</button>
-<button class="CancelEditBtn invBtn DefBtn" type="button">Cancel</button>
-</form>
-</span>
-<span style="font-style: italic; font-size: 10pt; vertical-align: top">
-    Entered by {{definition.definition.added_by}} on {{definition.definition.added_on}}
-{% if request.user == definition.definition.added_by or request.user.is_superuser %}
-    <img src="/static/menu-down.png" class="ShowOptions"/>
-    <img src="/static/menu-up.png" class="HideOptions"/>
-{% endif %}
-</span>
-{% if request.user == definition.definition.added_by or request.user.is_superuser %}
-<div class="OptionsDiv">
-    
-    <button class="EditBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Edit</button>
-    <button class="FlagBtn invBtn DefBtn" xdefid="{{definition.definition.id}}" title="Flag this definition for review">Flag</button>
-    <button class="DeleteBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Delete</button>
-</div>
-<div style="display: none">
-    <div class="FlagPrompt">
-        <p>Are you sure that you want to flag this question for review? This will record your name and the time that you requested review.</p>
-        <label>Reason for flagging:<br/><textarea id="FlagReasonInput"></textarea></label>
+            Definition: <br/>
+            {{definition.form.definition}}<br/>
+            Notes: <br/>
+            {{definition.form.notes}}<br/>
+            <button class="invBtn DefBtn" type="submit">Update</button>
+            <button class="CancelEditBtn invBtn DefBtn" type="button">Cancel</button>
+        </form>
+    </span>
+    <span style="font-style: italic; font-size: 10pt; vertical-align: top">
+        Entered by {{definition.definition.added_by}} on {{definition.definition.added_on}}
+        {% if request.user == definition.definition.added_by or request.user.is_superuser %}
+            <img src="/static/menu-down.png" class="ShowOptions" title="Show editing options"/>
+            <img src="/static/menu-up.png" class="HideOptions"/>
+        {% endif %}
+    </span>
+    {% if request.user == definition.definition.added_by or request.user.is_superuser %}
+    <div class="OptionsDiv">
+        
+        <button class="EditBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Edit</button>
+        <button class="FlagBtn invBtn DefBtn" xdefid="{{definition.definition.id}}" title="Flag this definition for review">Flag</button>
+        <button class="DeleteBtn invBtn DefBtn" xdefid="{{definition.definition.id}}">Delete</button>
     </div>
-    <div class="DeletePrompt">
-        <p>Are you <b>sure</b> that you want to flag this question for review? This action cannot be undone!</p>
-    </div>
-</dvi>
 {% endif %}
 </div>
 {% endfor %}
+{% if request.user.is_authenticated %}
+<div style="display: none">
+    <div id="FlagPrompt">
+        <p>Are you sure that you want to flag this question for review? This will record your name and the time that you requested review.</p>
+        <label>Reason for flagging:<br/><textarea id="FlagReasonInput"></textarea></label>
+    </div>
+    <div id="DeletePrompt">
+        <p>Are you <b>sure</b> that you want to delete this definition?!? This action cannot be undone!</p>
+    </div>
+</div>
+
+<div>
+    <div style="margin-top: 1em; display: inline-block">
+        <button type="button" class="invBtn" id="AddDefBtn">Add new definition</button>
+        <div id="AddNewDefinitionWrapper" style="display: none">
+            <form action="{% url app.views.words.add_def word.id %}" method="POST">{% csrf_token %}
+                <table>
+                {{new_def_form}}
+                </table>
+                <div style="text-align: right; margin-top: 0.5em">
+                    <button class="invBtn invBtnPrimary" type="submit" name="Action" value="AddDefinition">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 <script type="text/javascript" src="/static/view_word.js"></script>
 {% endblock %}
 
