@@ -9,7 +9,6 @@ import app.views.words
 urlpatterns = patterns('',
     (r'^$', app.views.home.index),
     (r'^entry/new_word/$', app.views.entry.enter_new_word),
-    (r'^word/id/(\d+)/$', app.views.words.view_word_by_id),
     (r'^word/(.+)/$', app.views.words.view_word),
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
