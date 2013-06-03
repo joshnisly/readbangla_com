@@ -13,7 +13,11 @@
             {% if request.user.is_authenticated %}
             <span id="AuthSpan">
                 <span>Logged in as {{request.user.username}}.</span>
-                <a id="LogoutLink" href="/logout">(Log Out)</a>
+                <a id="LogoutLink" href="/logout/">(Log Out)</a>
+            </span>
+            {% else %}
+            <span id="AuthSpan">
+                <a id="LogoutLink" href="/login/">Log In</a>
             </span>
             {% endif %}
             <ul>

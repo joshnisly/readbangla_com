@@ -39,7 +39,7 @@ def auth_login(request):
             else:
                 error = 'Invalid username or password.'
     else:
-        next_url = request.GET.get('next') or request.META.get('HTTP_REFERER')
+        next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or '/'
 
     return helpers.run_template(request, 'login', {
         'error': error,
