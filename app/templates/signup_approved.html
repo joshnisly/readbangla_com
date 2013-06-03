@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}User Approved{% endblock %}
+
+{% block content %}
+
+<h2>User Approved</h2>
+<p>You have approved {{ new_user.first_name }} {{ new_user.last_name }}. If this is in error, please contact
+your local system administrator.</p>
+
+{% endblock %}
+

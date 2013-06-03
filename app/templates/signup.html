@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+<h2>Sign Up</h2>
+<p>Ready to contribute? It's easy to sign up! Just fill out the information below:</p>
+<form method="POST" action="{% url app.views.auth.signup %}">{% csrf_token %}
+<table>
+    <tr>
+        <td>
+            <label><span class="Error">{{ form.first_name.errors|first }}</span>
+            First name<br/>{{ form.first_name }}</label>
+        </td>
+        <td>
+            <label><span class="Error">{{ form.last_name.errors|first }}</span>
+            Last name<br/>{{ form.last_name }}</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label><span class="Error">{{ form.email.errors|first }}</span>
+            Email<br/>{{ form.email }}</label>
+        </td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>
+            <label><span class="Error">{{ form.password.errors|first }}</span>
+            Password<br/>{{ form.password }}</label>
+        </td>
+        <td>
+            <label><span class="Error">{{ form.confirm_pw.errors|first }}</span>
+            Confirm Password<br/>{{ form.confirm_pw }}</label>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td align="right"><button type="submit">Sign Up</button></td>
+    </tr>
+</table>
+</form>
+
+
+{% endblock %}
+
+

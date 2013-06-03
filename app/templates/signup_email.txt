@@ -1,0 +1,7 @@
+Signup notification:
+Name: {{ first_name }} {{ last_name }}
+Email: {{ email }}
+IP address: {{ remote_ip }}
+
+To approve this request, click here:
+http://{{host}}{% url app.views.auth.approve_signup user_id %}

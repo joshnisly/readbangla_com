@@ -1,6 +1,6 @@
-{%extends "base.html" %}
+{% extends "base.html" %}
 
-{%block title %}Login{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
 <h3>Please log in to proceed:</h3>
@@ -12,7 +12,7 @@
 <p class="Error">{{ error }}</p>
 {% endif %}
 
-<form method="post" action="{% url app.views.home.auth_login %}">{% csrf_token %}
+<form method="post" action="{% url app.views.auth.auth_login %}">{% csrf_token %}
 <table>
 <tr>
     <td>Email</td>
@@ -30,6 +30,8 @@
 
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
+
+<p>Don't have an account? <a href="{% url app.views.auth.signup %}">Sign up</a> today!<br/>It's simple, quick, and doesn't even hurt.</p>
 
 {% endblock %}
 

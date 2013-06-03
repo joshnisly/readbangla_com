@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 
+import app.views.auth
 import app.views.entry
 import app.views.help
 import app.views.home
@@ -25,7 +26,8 @@ urlpatterns = patterns('',
     (r'^help/$', app.views.help.index),
     (r'^help/(.*)/$', app.views.help.index),
 
-
-    (r'^login/$', app.views.home.auth_login),
-    (r'^logout/$', app.views.home.auth_logout),
+    (r'^login/$', app.views.auth.auth_login),
+    (r'^logout/$', app.views.auth.auth_logout),
+    (r'^signup/$', app.views.auth.signup),
+    (r'^signup/approve/(\d+)/$', app.views.auth.approve_signup),
 )
