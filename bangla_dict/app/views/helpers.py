@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.template import Context, RequestContext, loader
 import json
 
+from app import email_send
 
 def run_template(request, template_name, parms,
                 template_file_override=None,
@@ -49,6 +50,12 @@ def run_template(request, template_name, parms,
     if not content_type is None:
         response['Content-Type'] = content_type 
     return response
+
+def send_email(to_list, subject, parms, template_name, cc=[], bcc=[], replyto=None):
+    template = loader.get_template(template_name + '.txt')
+    context = Context(parms)
+    email_text = template.render(context)
+    email_send.send_email(to_list, subject, email_text, cc, bcc, replyto)
 
 def json_entrypoint(func):
     def wrap(request, *a, **kw):

@@ -1,0 +1,6 @@
+Dear {{ user.first_name }} {{ user.last_name }},
+
+Congratulations, the administrators have approved your membership request!
+
+Click here to start contributing:
+http://{{host}}/

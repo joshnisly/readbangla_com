@@ -38,6 +38,11 @@ H5
     color: green;
     font-weight: bold;
 }
+.Error
+{
+    color: red;
+    font-weight: bold;
+}
 
 .Bangla
 {

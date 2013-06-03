@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up Complete{% endblock %}
+
+{% block content %}
+
+<h2>Sign Up Complete</h2>
+<p>Congratulations, that's all there is to it! In order to ensure the best quality dictionary, the
+site administrators will need to approve your signup request. Don't worry; it doesn't usually
+take long at all. You'll be notified by email as soon as your signup is approved.</p>
+
+<p>In the meantime, you can <a href="{% url app.views.lookup.index %}">look up words</a> in the dictionary.</p>
+
+{% endblock %}
+
