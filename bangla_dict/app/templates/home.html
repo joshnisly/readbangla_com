@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-Welcome to BanglaDict!
-<p>There are currently {{num_words}} words in the dictionary.</p>
-<p><a href="{% url app.views.words.recently_added %}">View recently added words</a></p>
+<div>Welcome to BanglaDict! There are currently {{num_words}} words in the dictionary.</div>
+<p>Lookup word:<br/><input type="text" class="Bangla" id="BanglaWord"/></p>
+<p id="Results"></p>
+<script type="text/javascript" src="/static/home.js"></script>
 {% endblock %}
 
