@@ -1,4 +1,5 @@
 
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import decorators, authenticate, login, logout
 from django.core.urlresolvers import reverse
 from django import forms
@@ -39,6 +40,7 @@ def index(request):
     return helpers.run_template(request, 'home__lookup', {
     })
 
+@csrf_exempt
 @helpers.json_entrypoint
 def lookup_ajax(request):
     word = request.JSON['word']
