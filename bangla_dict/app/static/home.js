@@ -8,6 +8,7 @@ function onAjaxSuccess(result)
     if (result.word != $('#BanglaWord').val())
         return;
 
+    $('#Throbber').hide();
     $('#Results').empty()
     if (result.dict_matches.length)
     {
@@ -39,6 +40,7 @@ function doAjaxLookup()
     if (!bangla)
         return;
 
+    $('#Throbber').show();
     doAjax({
         url: lookupUrl,
         data: {'word': bangla},
