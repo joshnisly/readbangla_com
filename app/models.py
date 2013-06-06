@@ -48,6 +48,16 @@ class FlaggedDefinition(models.Model):
                                              self.flagged_on)
 admin.site.register(FlaggedDefinition)
 
+# This table is for word lists that we don't have permission to use for 
+# definitions, but can just as a simple word list.
+class ExternalWord(models.Model):
+    word = models.CharField(max_length=50, unique=True)
+
+    def __unicode__(self):
+        return self.word
+
+admin.site.register(ExternalWord)
+
 #class AudioRecording(models.Model):
 #    word = models.ForeignKey(Word)
 #    audio = models.FileField()

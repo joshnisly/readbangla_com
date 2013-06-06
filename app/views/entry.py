@@ -8,10 +8,12 @@ import helpers
 import words
 
 from app import models
+from app import word_helpers
 
 ################################# Entrypoints
 @login_required
-def enter_new_word(request):
+def enter_new_word(request, new_word_id=None):
+    word = None
     word_form = _WordForm()
     definition_form = _DefinitionForm()
     if request.method == 'POST':
@@ -34,15 +36,24 @@ def enter_new_word(request):
 
     return helpers.run_template(request, 'entry__enter_new_word', {
         'word_form': word_form,
-        'definition_form': definition_form
+        'definition_form': definition_form,
+        'word': word
     })
+
+@helpers.json_entrypoint
+def new_word_ajax(request):
+    word = request.JSON['word']
+    word = word_helpers.simple_correct_spelling(word)
+    return {
+        'word': word
+    }
 
 ################################# Internals
 class _WordForm(forms.Form):
     bangla_word = forms.CharField(max_length=50,
                                   widget=forms.TextInput(attrs={
                                       'class': 'Bangla'
-                                  }))
+                                  }), label='Bangla')
 
 
 class _DefinitionForm(forms.Form):

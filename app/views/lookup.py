@@ -8,6 +8,7 @@ import helpers
 import words
 
 from app import models
+from app import word_helpers
 
 ################################# Entrypoints
 def index(request):
@@ -38,4 +39,39 @@ def index(request):
     return helpers.run_template(request, 'home__lookup', {
     })
 
+@helpers.json_entrypoint
+def lookup_ajax(request):
+    word = request.JSON['word']
+    word = word_helpers.simple_correct_spelling(word)
+    root_words = word_helpers.get_possible_roots(word)
+    result = {
+        'word': request.JSON['word'],
+        'corrected_word': word,
+        'dict_matches': [],
+        'word_matches': [],
+    }
+    for root in [word] + root_words:
+        match = _get_first_or_none(models.Word.objects.filter(word=root))
+        if match:
+            defs = match.definitions.all()
+            result['dict_matches'].append({
+                'word': match.word,
+                'defs': ['(%s) %s' % (x.get_part_of_speech_display(), x.english_word) \
+                         for x in defs],
+                'link': reverse(words.view_word, args=[match.word])
+            })
+        else:
+            match = _get_first_or_none(models.ExternalWord.objects.filter(word=root))
+            if match:
+                result['word_matches'].append(match.word)
 
+    return result
+
+
+
+################### Internals
+def _get_first_or_none(qs):
+    objs = list(qs[:1])
+    if objs:
+        return objs[0]
+    return None

@@ -1,12 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Enter New Word{% endblock %}
+
 {% block content %}
-<form action="{{request.get_full_path}}" method="POST" class="ModelForm">{% csrf_token %}
-<h2>Enter new word:</h2>
-<table>
-{{word_form}}
-{{definition_form}}
-</table>
-<button type="submit" name="Action" value="AddWord">Add Word</button>
-</form>
+<style>
+.Progress,
+.InProgress .Text
+{
+    display: none;
+}
+.InProgress .Progress
+{
+    display: inline;
+}
+</style>
+{% if word %}
+    <h2>Enter definition for {{word}}</h2>
+    <form action="{{request.get_full_path}}" method="POST" class="ModelForm">{% csrf_token %}
+    <table>
+    {{definition_form}}
+    </table>
+    <button type="submit" name="Action" value="AddWord">Add Word</button>
+    </form>
+{% else %}
+    <h2>Enter new word</h2>
+    <table>
+    {{word_form}}
+    </table>
+    <div class="Action">
+        <span class="Text"><button type="button" id="CheckWordBtn">Check word</button></span>
+        <span class="Progress"><img src="/static/throbber_large.gif"/></span>
+    </div>
+
+{% endif %}
+<script type="text/javascript" src="/static/enter_new_word.js"></script>
 {% endblock %}
