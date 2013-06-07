@@ -206,11 +206,14 @@ def _on_verify_email(request, email, first_name=None, last_name=None):
 
     else:
         request.session['email'] = email
-        initial = {
-            'first_name': first_name or '',
-            'last_name': last_name or ''
-        }
-        form = _SignupOpenIDForm(initial)
+        if first_name or last_name:
+            initial = {
+                'first_name': first_name or '',
+                'last_name': last_name or ''
+            }
+            form = _SignupOpenIDForm(initial)
+        else:
+            form = _SignupOpenIDForm()
         return helpers.run_template(request, 'signup_openid', {
             'form': form
         })
