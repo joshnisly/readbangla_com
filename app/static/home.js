@@ -2,13 +2,29 @@
 var timer = null;
 var lookupUrl = '/words/lookup/ajax/';
 var lookupUrl = '/words/lookup/ajax/';
+var avro = OmicronLab.Avro.Phonetic;
+var lastResult = null;
+
+function isAscii(str)
+{
+    for (var i = 0; i < str.length; i++)
+    {
+        if (str[i] < 32 || str[i] > 126)
+            return false;
+    }
+
+    return true;
+}
 
 function onAjaxSuccess(result)
 {
     if (result.word != $('#BanglaWord').val())
         return;
 
+    lastResult = result.word;
+
     $('#Throbber').hide();
+    $('#LookupBtn').show();
     $('#Results').empty()
     if (result.dict_matches.length)
     {
@@ -17,7 +33,7 @@ function onAjaxSuccess(result)
         {
             var match = result.dict_matches[i];
             var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch WithDef');
-            wordWrapper.appendNewChild('A').text(match.word).attr('href', match.link);
+            wordWrapper.appendNewChild('A', '', 'Bangla').text(match.word).attr('href', match.link);
             for (var iDef = 0; iDef < match.defs.length; iDef++)
                 wordWrapper.appendNewChild('SPAN').text(' - ' + match.defs[iDef]);
         }
@@ -28,7 +44,7 @@ function onAjaxSuccess(result)
         for (var i = 0; i < result.word_matches.length; i++)
         {
             var match = result.word_matches[i];
-            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch');
+            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch Bangla');
             wordWrapper.text(match.word);
         }
     }
@@ -37,10 +53,16 @@ function onAjaxSuccess(result)
 function doAjaxLookup()
 {
     var bangla = $('#BanglaWord').val();
-    if (!bangla)
+    if (!bangla || bangla == lastResult)
         return;
 
+    if (isAscii(bangla))
+    {
+        bangla = avro.parse(bangla);
+        $('#BanglaWord').val(bangla);
+    }
     $('#Throbber').show();
+    $('#LookupBtn').hide();
     doAjax({
         url: lookupUrl,
         data: {'word': bangla},
@@ -55,11 +77,16 @@ function onWordChange()
         window.clearTimeout(timer)
         timer = null;
     }
-    timer = window.setTimeout(doAjaxLookup, 500);
+    timer = window.setTimeout(doAjaxLookup, 2000);
 }
 
 $(document).ready(function() {
     $('#BanglaWord').bind('input', onWordChange);
+    $('#BanglaWord').bind('keydown', function(event) {
+        if (event.keyCode == 13)
+            doAjaxLookup();
+    });
+    $('#LookupBtn').bind('click', doAjaxLookup);
 });
 
 })();
