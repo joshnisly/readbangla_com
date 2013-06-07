@@ -3,7 +3,10 @@ from django.contrib.auth import decorators, authenticate, login, logout
 from django.contrib.auth.models import User
 from django import forms
 from django.http import HttpResponseForbidden, HttpResponseRedirect
+import urllib
+import urlparse
 
+import facebook
 import openid.extensions.ax # pylint: disable-msg=F0401
 from openid.consumer import consumer # pylint: disable-msg=F0401
 
@@ -78,34 +81,7 @@ def gmail_openid_return(request):
         ax_response = openid.extensions.ax.FetchResponse()
         ax_response = ax_response.fromSuccessResponse(openid_response)
         email = ax_response.get(_AX_EMAIL_URL)[0]
-
-        # See if this user has already signed up.
-        users = User.objects.filter(username=email)
-        if len(users):
-            assert len(users) == 1
-            user = users[0]
-            if not user.is_active:
-                error = 'Please wait for a moderator to enable your account.'
-                return helpers.run_template(request, 'error', {
-                    'message': error
-                })
-            else:
-                user = authenticate(username=email, password='')
-                if not user:
-                    error = 'There is a password assigned to this account.' + \
-                            'Please log in with that password.'
-                    return helpers.run_template(request, 'error', {
-                        'message': error
-                    })
-                login(request, user)
-            return HttpResponseRedirect(request.session.get('next', '/'))
-
-        else:
-            request.session['email'] = email
-            form = _SignupOpenIDForm()
-            return helpers.run_template(request, 'signup_openid', {
-                'form': form
-            })
+        return _on_verify_email(request, email)
 
     return HttpResponseRedirect(reverse(auth_login))
 
@@ -134,6 +110,36 @@ def openid_finish(request):
     return helpers.run_template(request, 'signup_openid', {
         'form': form
     })
+
+
+### Facebook stuff
+def fb_oauth_start(request):
+    return_url = request.build_absolute_uri(reverse(fb_oauth_return))
+    fb_url = _FB_OAUTH_URL + '&redirect_uri=' + urllib.quote_plus(return_url)
+    return HttpResponseRedirect(fb_url)
+
+def fb_oauth_return(request):
+    if 'error_message' in request.GET:
+        return helpers.run_template(request, 'error', {
+            'message': 'Unable to log in: ' + request.GET['error_message']
+        })
+    elif 'code' in request.GET:
+        code = request.GET['code']
+
+        redirect_uri = request.build_absolute_uri(reverse(fb_oauth_return))
+        access_token = facebook.get_access_token_from_code(code, redirect_uri,
+                                                           _FB_APP_ID,
+                                                           _FB_APP_SECRET)['access_token']
+        graph = facebook.GraphAPI(access_token)
+        user = graph.get_object('me')
+        return _on_verify_email(request, user['email'], first_name=user['first_name'],
+                                last_name=user['last_name'])
+    else:
+        return helpers.run_template(request, 'error', {
+            'message': 'An unexpected error occurred.'
+        })
+
+
 
 ############################ Signup
 def signup(request):
@@ -176,6 +182,39 @@ def approve_signup(request, user_id):
     return helpers.run_template(request, 'signup_approved', {'new_user': user})
 
 ######################################################################
+def _on_verify_email(request, email, first_name=None, last_name=None):
+    # See if this user has already signed up.
+    users = User.objects.filter(username=email)
+    if len(users):
+        assert len(users) == 1
+        user = users[0]
+        if not user.is_active:
+            error = 'Please wait for a moderator to enable your account.'
+            return helpers.run_template(request, 'error', {
+                'message': error
+            })
+        else:
+            user = authenticate(username=email, password='')
+            if not user:
+                error = 'There is a password assigned to this account.' + \
+                        'Please log in with that password.'
+                return helpers.run_template(request, 'error', {
+                    'message': error
+                })
+            login(request, user)
+        return HttpResponseRedirect(request.session.get('next', '/'))
+
+    else:
+        request.session['email'] = email
+        initial = {
+            'first_name': first_name or '',
+            'last_name': last_name or ''
+        }
+        form = _SignupOpenIDForm(initial)
+        return helpers.run_template(request, 'signup_openid', {
+            'form': form
+        })
+
 def _send_signup_email(request, parms):
     parms = dict(parms)
     parms['remote_ip'] = request.META['REMOTE_ADDR']
@@ -214,4 +253,7 @@ _AX_EMAIL_URL = 'http://axschema.org/contact/email'
 #_AX_FIRST_NAME_URL = 'http://axschema.org/namePerson/first'
 #_AX_LAST_NAME_URL = 'http://axschema.org/namePerson/last'
 
+_FB_APP_ID = '460019804088843'
+_FB_APP_SECRET = '5a2928997b7994fba9f81258ce7e905b'
+_FB_OAUTH_URL = 'https://www.facebook.com/dialog/oauth/?client_id=%s&scope=email' % _FB_APP_ID
 
