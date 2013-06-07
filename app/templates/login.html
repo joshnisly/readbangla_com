@@ -36,7 +36,9 @@
     <td style="border-left: 2px solid #CCC; padding-left: 3em; text-align: center">
     <h3>Log in with</h3>
     <div>
-        <img src="/static/facebook_logo.jpg" style="height: 52px"/>
+        <a href="{% url app.views.auth.fb_oauth_start %}">
+            <img src="/static/facebook_logo.jpg" style="height: 52px"/>
+        </a>
     </div>
     <div style="margin-top: 0.5em">
         <a href="{% url app.views.auth.gmail_openid_start %}">
