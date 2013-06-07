@@ -1,8 +1,11 @@
-from django import forms
+from django.core.urlresolvers import reverse
 from django.contrib.auth import decorators, authenticate, login, logout
 from django.contrib.auth.models import User
+from django import forms
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 
+import openid.extensions.ax # pylint: disable-msg=F0401
+from openid.consumer import consumer # pylint: disable-msg=F0401
 
 import helpers
 import settings
@@ -33,6 +36,7 @@ def auth_login(request):
                 error = 'Invalid username or password.'
     else:
         next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or '/'
+        request.session['next'] = next_url
 
     return helpers.run_template(request, 'login', {
         'error': error,
@@ -43,6 +47,93 @@ def auth_login(request):
 def auth_logout(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+def gmail_openid_start(request):
+    openid_parms = {}
+    con = consumer.Consumer(openid_parms, None)
+
+    # Get openid_request
+    openid_request = con.begin(_GMAIL_URL)
+
+    # Setup AttributeExchange (ax) to get the user email address
+    ax_request = openid.extensions.ax.FetchRequest()
+    ax_request.add(openid.extensions.ax.AttrInfo(_AX_EMAIL_URL, alias='email',
+                                                 required=True))
+    openid_request.addExtension(ax_request)
+
+    # Get redirect url
+    realm = request.build_absolute_uri('/')
+    return_url = request.build_absolute_uri(reverse(gmail_openid_return))
+    redirect_url = openid_request.redirectURL(return_to=return_url, realm=realm)
+
+    return HttpResponseRedirect(redirect_url)
+
+
+def gmail_openid_return(request):
+    con = consumer.Consumer({}, None)
+    this_url = request.build_absolute_uri(reverse(gmail_openid_return))
+    openid_response = con.complete(request.POST or request.GET, this_url)
+    
+    if openid_response.status == consumer.SUCCESS:
+        ax_response = openid.extensions.ax.FetchResponse()
+        ax_response = ax_response.fromSuccessResponse(openid_response)
+        email = ax_response.get(_AX_EMAIL_URL)[0]
+
+        # See if this user has already signed up.
+        users = User.objects.filter(username=email)
+        if len(users):
+            assert len(users) == 1
+            user = users[0]
+            if not user.is_active:
+                error = 'Please wait for a moderator to enable your account.'
+                return helpers.run_template(request, 'error', {
+                    'message': error
+                })
+            else:
+                user = authenticate(username=email, password='')
+                if not user:
+                    error = 'There is a password assigned to this account.' + \
+                            'Please log in with that password.'
+                    return helpers.run_template(request, 'error', {
+                        'message': error
+                    })
+                login(request, user)
+            return HttpResponseRedirect(request.session.get('next', '/'))
+
+        else:
+            request.session['email'] = email
+            form = _SignupOpenIDForm()
+            return helpers.run_template(request, 'signup_openid', {
+                'form': form
+            })
+
+    return HttpResponseRedirect(reverse(auth_login))
+
+def openid_finish(request):
+    if request.method != 'POST':
+        return HttpResponseRedirect('/')
+    assert request.session['email']
+    form = _SignupOpenIDForm(request.POST)
+    if form.is_valid():
+        user = User(username=request.session['email'],
+                    first_name=form.cleaned_data['first_name'],
+                    last_name=form.cleaned_data['last_name'],
+                    email=request.session['email'],
+                    is_active=False,
+                    is_superuser=False)
+        user.set_password('')
+        user.save()
+        _send_signup_email(request, {
+            'first_name': form.cleaned_data['first_name'],
+            'last_name': form.cleaned_data['last_name'],
+            'email': request.session['email'],
+            'user_id': user.id,
+        })
+        return helpers.run_template(request, 'signup_success', {})
+
+    return helpers.run_template(request, 'signup_openid', {
+        'form': form
+    })
 
 ############################ Signup
 def signup(request):
@@ -58,15 +149,12 @@ def signup(request):
                         is_superuser=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            admin_emails = [x[1] for x in settings.ADMINS]
-            helpers.send_email(admin_emails, 'Signup Request', {
-                                  'first_name': form.cleaned_data['first_name'],
-                                  'last_name': form.cleaned_data['last_name'],
-                                  'email': form.cleaned_data['email'],
-                                  'user_id': user.id,
-                                  'remote_ip': request.META['REMOTE_ADDR'],
-                                  'host': settings.HOST
-                              }, 'signup_email')
+            _send_signup_email(request, {
+                'first_name': form.cleaned_data['first_name'],
+                'last_name': form.cleaned_data['last_name'],
+                'email': form.cleaned_data['email'],
+                'user_id': user.id,
+            })
             return helpers.run_template(request, 'signup_success', {})
 
     return helpers.run_template(request, 'signup', {'form': form})
@@ -87,6 +175,14 @@ def approve_signup(request, user_id):
                           }, 'signup_approved_email', bcc=admin_emails)
     return helpers.run_template(request, 'signup_approved', {'new_user': user})
 
+######################################################################
+def _send_signup_email(request, parms):
+    parms = dict(parms)
+    parms['remote_ip'] = request.META['REMOTE_ADDR']
+    parms['host'] = settings.HOST
+
+    admin_emails = [x[1] for x in settings.ADMINS]
+    helpers.send_email(admin_emails, 'Signup Request', parms, 'signup_email')
 
 class _SignupForm(forms.Form):
     first_name = forms.CharField(max_length=100)
@@ -94,7 +190,6 @@ class _SignupForm(forms.Form):
     email = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_pw = forms.CharField(widget=forms.PasswordInput)
-    reason = forms.CharField(max_length=200, required=False)
 
     def clean(self):
         # Make sure passwords match
@@ -109,5 +204,14 @@ class _SignupForm(forms.Form):
                 del self.cleaned_data['password']
                 del self.cleaned_data['confirm_pw']
         return self.cleaned_data
+
+class _SignupOpenIDForm(forms.Form):
+    first_name = forms.CharField(max_length=100)
+    last_name = forms.CharField(max_length=100)
+
+_GMAIL_URL = 'https://www.google.com/accounts/o8/id'
+_AX_EMAIL_URL = 'http://axschema.org/contact/email'
+#_AX_FIRST_NAME_URL = 'http://axschema.org/namePerson/first'
+#_AX_LAST_NAME_URL = 'http://axschema.org/namePerson/last'
 
 
