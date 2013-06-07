@@ -12,6 +12,7 @@ def get_possible_roots(word):
         u'\u0995\u09c7', # "ke"
         u'\u09A6\u09C7\u09B0', # "der"
         u'\u09C7\u09B0\u09BE', # "era"
+        u'\u09B0', # "r"
     ]
     for suffix in suffixes:
         if word.endswith(suffix):
