@@ -4,32 +4,47 @@
 
 {% block content %}
 <h3>Please log in to proceed:</h3>
-{% if form.errors %}
-<p class="Error">Your email and password didn't match. Please try again.</p>
-{% endif %}
+<table><tr>
+    <td style="padding-right: 3em">
+        {% if form.errors %}
+        <p class="Error">Your email and password didn't match. Please try again.</p>
+        {% endif %}
 
-{% if error %}
-<p class="Error">{{ error }}</p>
-{% endif %}
+        {% if error %}
+        <p class="Error">{{ error }}</p>
+        {% endif %}
 
-<form method="post" action="{% url app.views.auth.auth_login %}">{% csrf_token %}
-<table>
-<tr>
-    <td>Email</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-<tr>
-    <td></td>
-    <td align="right"><input type="submit" value="Log In" /></td>
-</tr>
-</table>
+        <form method="post" action="{% url app.views.auth.auth_login %}">{% csrf_token %}
+        <table>
+        <tr>
+            <td>Email</td>
+            <td>{{ form.username }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.password.label_tag }}</td>
+            <td>{{ form.password }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td align="right"><input type="submit" value="Log In" /></td>
+        </tr>
+        </table>
 
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
+        <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+    </td>
+    <td style="border-left: 2px solid #CCC; padding-left: 3em; text-align: center">
+    <h3>Log in with</h3>
+    <div>
+        <img src="/static/facebook_logo.jpg" style="height: 52px"/>
+    </div>
+    <div style="margin-top: 0.5em">
+        <a href="{% url app.views.auth.gmail_openid_start %}">
+            <img src="/static/gmail_logo.jpeg" style="height: 52px"/>
+        </a>
+    </div>
+    </td>
+</tr></table>
 
 <p>Don't have an account? <a href="{% url app.views.auth.signup %}">Sign up</a> today!<br/>It's simple, quick, and doesn't even hurt.</p>
 

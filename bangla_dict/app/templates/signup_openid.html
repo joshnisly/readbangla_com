@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Sign Up{% endblock %}
+
+{% block content %}
+
+<h2>Complete Sign Up</h2>
+<p>Got it, thanks. We just need a little more information to add your account:</p>
+<form method="POST" action="{% url app.views.auth.openid_finish %}">{% csrf_token %}
+<table>
+    <tr>
+        <td>
+            <label><span class="Error">{{ form.first_name.errors|first }}</span>
+            First name<br/>{{ form.first_name }}</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label><span class="Error">{{ form.last_name.errors|first }}</span>
+            Last name<br/>{{ form.last_name }}</label>
+        </td>
+    </tr>
+    <tr>
+        <td align="right"><button type="submit">Sign Up</button></td>
+    </tr>
+</table>
+</form>
+
+
+{% endblock %}
+
+
