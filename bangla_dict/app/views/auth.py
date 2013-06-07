@@ -62,6 +62,10 @@ def gmail_openid_start(request):
     ax_request = openid.extensions.ax.FetchRequest()
     ax_request.add(openid.extensions.ax.AttrInfo(_AX_EMAIL_URL, alias='email',
                                                  required=True))
+    ax_request.add(openid.extensions.ax.AttrInfo(_AX_FIRST_NAME_URL, alias='first_name',
+                                                 required=True))
+    ax_request.add(openid.extensions.ax.AttrInfo(_AX_LAST_NAME_URL, alias='last_name',
+                                                 required=True))
     openid_request.addExtension(ax_request)
 
     # Get redirect url
@@ -81,7 +85,9 @@ def gmail_openid_return(request):
         ax_response = openid.extensions.ax.FetchResponse()
         ax_response = ax_response.fromSuccessResponse(openid_response)
         email = ax_response.get(_AX_EMAIL_URL)[0]
-        return _on_verify_email(request, email)
+        first_name = ax_response.get(_AX_FIRST_NAME_URL)[0]
+        last_name = ax_response.get(_AX_LAST_NAME_URL)[0]
+        return _on_verify_email(request, email, first_name, last_name)
 
     return HttpResponseRedirect(reverse(auth_login))
 
@@ -253,8 +259,8 @@ class _SignupOpenIDForm(forms.Form):
 
 _GMAIL_URL = 'https://www.google.com/accounts/o8/id'
 _AX_EMAIL_URL = 'http://axschema.org/contact/email'
-#_AX_FIRST_NAME_URL = 'http://axschema.org/namePerson/first'
-#_AX_LAST_NAME_URL = 'http://axschema.org/namePerson/last'
+_AX_FIRST_NAME_URL = 'http://axschema.org/namePerson/first'
+_AX_LAST_NAME_URL = 'http://axschema.org/namePerson/last'
 
 _FB_APP_ID = '460019804088843'
 _FB_APP_SECRET = '5a2928997b7994fba9f81258ce7e905b'
