@@ -53,7 +53,7 @@ def lookup_ajax(request):
         'word_matches': [],
     }
     for root in [word] + root_words:
-        match = _get_first_or_none(models.Word.objects.filter(word=root))
+        match = helpers.get_first_or_none(models.Word, word=root)
         if match:
             defs = match.definitions.all()
             result['dict_matches'].append({
@@ -63,17 +63,10 @@ def lookup_ajax(request):
                 'link': reverse(words.view_word, args=[match.word])
             })
         else:
-            match = _get_first_or_none(models.ExternalWord.objects.filter(word=root))
+            match = helpers.get_first_or_none(models.ExternalWord, word=root)
             if match:
                 result['word_matches'].append(match.word)
 
     return result
 
 
-
-################### Internals
-def _get_first_or_none(qs):
-    objs = list(qs[:1])
-    if objs:
-        return objs[0]
-    return None

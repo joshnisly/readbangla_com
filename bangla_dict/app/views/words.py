@@ -99,7 +99,10 @@ def delete_def(request):
     word_def = get_object_or_404(models.Definition, pk=def_id)
     assert word_def.added_by == request.user or request.user.is_superuser
 
+    word = word_def.word
     word_def.delete()
+    if not word.definitions.all().count():
+        word.delete()
     return {'success': True}
 
 

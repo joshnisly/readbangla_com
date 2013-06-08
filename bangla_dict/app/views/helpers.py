@@ -76,6 +76,11 @@ def json_entrypoint(func):
         return HttpResponse(json_str, mimetype='text/javascript')
     return wrap
 
+def get_first_or_none(model, **kwargs):
+    objs = list(model.objects.filter(**kwargs)[:1])
+    if objs:
+        return objs[0]
+    return None
 
 ############################### Internals
 def _get_page_structure():

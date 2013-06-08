@@ -2,6 +2,7 @@
 var timer = null;
 var lookupUrl = '/words/lookup/ajax/';
 var lookupUrl = '/words/lookup/ajax/';
+var newWordUrl = '/entry/new_def/';
 var avro = OmicronLab.Avro.Phonetic;
 var lastResult = null;
 
@@ -44,8 +45,10 @@ function onAjaxSuccess(result)
         for (var i = 0; i < result.word_matches.length; i++)
         {
             var match = result.word_matches[i];
-            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch Bangla');
-            wordWrapper.text(match.word);
+            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch');
+            wordWrapper.appendNewChild('SPAN', '', 'Bangla').text(match + ' - ');
+            wordWrapper.appendNewChild('A').text('Add definition').attr('href', newWordUrl + match + '/');
+            wordWrapper.appendNewChild('SPAN').text(' Request definition');
         }
     }
 }

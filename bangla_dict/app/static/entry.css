@@ -1,0 +1,50 @@
+.LookupBtn
+{
+    font-size: 14pt;
+    line-height: 20pt;
+}
+
+.Progress,
+.InProgress .Text
+{
+    display: none;
+}
+.InProgress .Progress
+{
+    display: inline;
+}
+
+UL.errorlist
+{
+    float: right;
+    list-style-type: none;
+    font-weight: bold;
+    color: red;
+    padding-left: 1em;
+}
+
+::-webkit-input-placeholder
+{
+   font-style: italic;
+}
+:-moz-placeholder
+{ /* Firefox 18- */
+   font-style: italic;
+}
+::-moz-placeholder
+{  /* Firefox 19+ */
+   font-style: italic;
+}
+:-ms-input-placeholder
+{  
+   font-style: italic;
+}
+
+#ChecklistItems LI
+{
+    margin-bottom: 0.35em;
+}
+#ChecklistItems
+{
+    padding-left: 1.5em;
+}
