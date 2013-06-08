@@ -12,7 +12,7 @@ from app import word_helpers
 
 ################################# Entrypoints
 @login_required
-def enter_new_word(request, new_word_id=None):
+def enter_new_word(request):
     word = None
     word_form = _WordForm()
     definition_form = _DefinitionForm()
@@ -37,7 +37,33 @@ def enter_new_word(request, new_word_id=None):
     return helpers.run_template(request, 'entry__enter_new_word', {
         'word_form': word_form,
         'definition_form': definition_form,
-        'word': word
+        'word_str': None
+    })
+
+@login_required
+def enter_definition(request, word_str=None):
+    definition_form = _DefinitionForm()
+    if request.method == 'POST':
+        definition_form = _DefinitionForm(request.POST)
+        if definition_form.is_valid():
+            word = helpers.get_first_or_none(models.Word, word=word_str)
+            if not word:
+                word = models.Word.objects.create(word=word_str,
+                                                  added_by=request.user)
+            def_data = definition_form.cleaned_data
+            definition = models.Definition.objects.create(word=word,
+                                  part_of_speech=def_data['part_of_speech'],
+                                  english_word=def_data['english_word'],
+                                  definition=def_data['definition'],
+                                  notes=def_data['notes'],
+                                  added_by=request.user)
+
+            return HttpResponseRedirect(reverse(words.view_word,
+                                                args=[word.word]))
+
+    return helpers.run_template(request, 'entry__enter_new_word', {
+        'definition_form': definition_form,
+        'word_str': word_str
     })
 
 @helpers.json_entrypoint
@@ -59,8 +85,16 @@ class _WordForm(forms.Form):
 class _DefinitionForm(forms.Form):
     word = forms.CharField(widget=forms.HiddenInput(), required=False)
     part_of_speech = forms.CharField(widget=forms.Select(
-                                        choices=models.PART_OF_SPEECH_CHOICES))
-    english_word = forms.CharField(max_length=50)
-    definition = forms.CharField(widget=forms.Textarea(), required=False)
-    notes = forms.CharField(widget=forms.Textarea(), required=False)
+                                     choices=models.PART_OF_SPEECH_CHOICES),
+                                     initial='N')
+    english_word = forms.CharField(max_length=50, widget=forms.TextInput(attrs={
+                      'title': 'Multiple words can be entered comma-separated',
+                      'placeholder': 'e.g. house,home,dwelling'
+                  }))
+    definition = forms.CharField(required=False, widget=forms.Textarea(attrs={
+                      'placeholder': '(Optional)'
+                  }))
+    notes = forms.CharField(required=False, widget=forms.Textarea(attrs={
+                      'placeholder': '(Optional)'
+                  }))
 

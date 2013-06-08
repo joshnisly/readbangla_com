@@ -1,18 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<style>
-#LookupBtn
-{
-    font-size: 14pt;
-    line-height: 20pt;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="/static/entry.css"/>
 <div>Welcome to BanglaDict! There are currently {{num_words}} words in the dictionary.</div>
 <div style="margin-top: 1em">Lookup word:<br/>
     <table><tr>
         <td><input type="text" class="Bangla" id="BanglaWord" /></td>
-        <td><button type="button" id="LookupBtn" class="invBtn invBtnPrimary">Lookup</button></td>
+        <td><button type="button" id="LookupBtn" class="LookupBtn invBtn invBtnPrimary">Lookup</button></td>
         <td><img src="/static/throbber_large.gif" id="Throbber" style="display: none"/></td>
     </tr></table>
 </div>
