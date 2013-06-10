@@ -22,7 +22,7 @@ function onAjaxSuccess(result)
 
     lastResult = result.word;
 
-    if (result.dict_matches.length + result.word_matches.length == 1)
+    if (result.dict_matches.length + result.word_matches.length == 1 && false)
     {
         var singleMatch = result.dict_matches.length > 0 ? result.dict_matches[0] : result.word_matches[0];
         window.location = singleMatch.view_url;

@@ -8,6 +8,7 @@ PART_OF_SPEECH_CHOICES = (
     ('D', 'Adverb'),
     ('N', 'Noun'),
     ('P', 'Pronoun'),
+    ('R', 'Preposition'),
     ('V', 'Verb')
 )
 
@@ -24,7 +25,7 @@ class Definition(models.Model):
     word = models.ForeignKey(Word, related_name='definitions')
     parent_word = models.ForeignKey(Word, blank=True, null=True, related_name='children')
     part_of_speech = models.CharField(max_length=2, choices=PART_OF_SPEECH_CHOICES)
-    english_word = models.CharField(max_length=50)
+    english_word = models.CharField(max_length=100)
     definition = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
@@ -66,10 +67,12 @@ admin.site.register(ExternalWord)
 #    added_on = models.DateTimeField(auto_now_add=True)
 
 def get_automated_user(desc):
-    username = '%s (automated)' % desc
+    username = '%s_automated' % desc
     return auth_models.User.objects.get_or_create(username=username,
                                                   defaults={
                                                       'username': username,
                                                       'email': '',
-                                                      'password': ''
+                                                      'password': '',
+                                                      'first_name': desc,
+                                                      'last_name': '(automated)',
                                                   })[0]
