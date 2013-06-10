@@ -75,13 +75,7 @@ TEXTAREA
         {% for definition in definitions %}
         <div class="Definition" style="margin-bottom: 1em">
             <span class="ReadOnlySection">
-                ({{definition.definition.get_part_of_speech_display}})
-                {{definition.definition.english_word}}<br/>
-
-                Definition: <span style="white-space: pre-word">{{definition.definition.definition}}</span><br/>
-                {% if definition.definition.notes %}
-                Notes: <span style="white-space: pre-word">{{definition.definition.notes}}</span><br/>
-                {% endif %}
+                {% include "word_definition_snippet.html" with definition=definition.definition %}
             </span>
             <span class="EditingSection">
                 <form action="{% url app.views.words.edit_def definition.definition.id %}" method="POST">{% csrf_token %}
@@ -97,7 +91,8 @@ TEXTAREA
                 </form>
             </span>
             <span style="font-style: italic; font-size: 10pt; vertical-align: top">
-                Entered by {{definition.definition.added_by}} on {{definition.definition.added_on}}
+                Entered by {{definition.definition.added_by.first_name}} {{definition.definition.added_by.last_name}}
+                        on {{definition.definition.added_on}}
                 {% if request.user == definition.definition.added_by or request.user.is_superuser %}
                     <img src="/static/menu-down.png" class="ShowOptions" title="Show editing options"/>
                     <img src="/static/menu-up.png" class="HideOptions"/>

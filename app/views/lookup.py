@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 from django.http import HttpResponseRedirect
 
+import entry
 import helpers
 import words
 
@@ -43,7 +44,7 @@ def index(request):
 @csrf_exempt
 @helpers.json_entrypoint
 def lookup_ajax(request):
-    word = request.JSON['word']
+    word = request.JSON['word'].strip()
     word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
@@ -60,12 +61,16 @@ def lookup_ajax(request):
                 'word': match.word,
                 'defs': ['(%s) %s' % (x.get_part_of_speech_display(), x.english_word) \
                          for x in defs],
-                'link': reverse(words.view_word, args=[match.word])
+                'view_url': reverse(words.view_word, args=[match.word])
             })
         else:
             match = helpers.get_first_or_none(models.ExternalWord, word=root)
             if match:
-                result['word_matches'].append(match.word)
+                result['word_matches'].append({
+                    'word': match.word,
+                    'view_url': reverse(words.view_word, args=[match.word]),
+                    'add_def_url': reverse(entry.enter_definition, args=[match.word]),
+                })
 
     return result
 

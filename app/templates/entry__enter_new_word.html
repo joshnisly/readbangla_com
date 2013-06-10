@@ -5,6 +5,14 @@
 <link rel="stylesheet" type="text/css" href="/static/entry.css"/>
 {% if word_str %}
     <h2>Enter definition for <span style="font-size: 20pt">{{word_str}}</span></h2>
+    {% if existing_defs %}
+    <div style="padding-left: 2em; padding-bottom: 1em">
+        <h3 style="margin-bottom: 0.15em;">Existing definitions</h3>
+        {% for def in existing_defs %}
+            {% include "word_definition_snippet.html" with definition=def %}
+        {% endfor %}
+    </div>
+    {% endif %}
     <table><tr>
     <td style="width: 40em">
         <form action="{{request.get_full_path}}" method="POST" class="ModelForm" style="display: inline-block">{% csrf_token %}
@@ -20,7 +28,7 @@
     <td style="vertical-align: top">
         <h3>Checklist for great definitions</h3>
         <ul id="CheckListItems">
-            <li>Does this word have multiple definitions? Be sure to use the "Add another definition" button to enter them all</li>
+            <li>Does this word have multiple definitions? Be sure to use the "Add another definition" button to enter them all.</li>
             <li>Is this word a form of another word? Please enter the "root" word first, then enter this word from there.</li>
             <li>Does this definition duplicate an existing definition? Please don't create a new one! Instead, flag the other definition, and explain how it can be improved.</li>
         </ul>

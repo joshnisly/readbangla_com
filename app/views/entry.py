@@ -61,9 +61,14 @@ def enter_definition(request, word_str=None):
             return HttpResponseRedirect(reverse(words.view_word,
                                                 args=[word.word]))
 
+    existing_defs = []
+    word = helpers.get_first_or_none(models.Word, word=word_str)
+    if word:
+        existing_defs = list(word.definitions.all())
     return helpers.run_template(request, 'entry__enter_new_word', {
         'definition_form': definition_form,
-        'word_str': word_str
+        'word_str': word_str,
+        'existing_defs': existing_defs
     })
 
 @helpers.json_entrypoint
