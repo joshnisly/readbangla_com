@@ -74,12 +74,15 @@ def lookup_ajax(request):
 
     return result
 
-def phrase_lookup(request):
+def phrase_lookup(request, phrase_text=None):
+    if not phrase_text and request.method == 'POST':
+        phrase_text = request.POST['Phrase']
+
+
     phrase = ''
     results = []
-    if request.method == 'POST':
-        phrase = request.POST['Phrase']
-        phrase_words = phrase.split(' ')
+    if phrase_text:
+        phrase_words = phrase_text.split(' ')
         for word in phrase_words:
             word = word_helpers.simple_correct_spelling(word)
 
@@ -115,7 +118,7 @@ def phrase_lookup(request):
             })
             
     return helpers.run_template(request, 'home__phrase_lookup', {
-        'phrase': phrase,
+        'phrase': phrase_text or '',
         'results': results
     })
 
