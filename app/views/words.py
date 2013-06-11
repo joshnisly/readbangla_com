@@ -32,7 +32,7 @@ def view_word(request, word_str):
     return helpers.run_template(request, 'view_word', {
         'word': word,
         'word_str': word_str,
-        'encoded_word_str': urllib.quote_plus(word_str.encode('utf-8')),
+        'samsad_url': helpers.get_samsad_url(word_str),
         'definitions': definitions,
         'new_def_form': new_def_form
     })

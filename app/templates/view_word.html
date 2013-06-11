@@ -45,27 +45,6 @@ TEXTAREA
 {
     cursor: pointer;
 }
-.Pane
-{
-    position: absolute;
-    top: 2em;
-    bottom: 0;
-    width: 50%;
-    left: 0;
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-}
-.Pane > IFRAME
-{
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;
-    border: 0;
-}
 </style>
 <div class="Pane" style="padding: 1em">
     <p class="Bangla" style="font-size: 26pt; margin: 0.1em 0">{{word_str}}</p>
@@ -145,7 +124,7 @@ TEXTAREA
     <script type="text/javascript" src="/static/view_word.js"></script>
 </div>
 <div class="Pane" style="left: 50%">
-    <iframe src="http://dsalsrv02.uchicago.edu/cgi-bin/romadict.pl?query={{encoded_word_str}}&searchhws=yes&table=biswas-bengali"></iframe>
+    <iframe src="{{samsad_url}}"></iframe>
 </div>
 </div>
 {% endblock %}
