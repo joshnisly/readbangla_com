@@ -30,7 +30,7 @@ PARTS_OF_SPEECH = {
     'adj': 'A',
     'adv.': 'D',
     'adv': 'D',
-    #'name': '',
+    'name': 'O',
     'noun': 'N',
     'prep.': 'R',
     'verb': 'V',
@@ -75,14 +75,6 @@ def convert(input_path, debug):
                 skipped += 1
                 if debug:
                     print 'Skipping word %s due to no part of speech...' % word['id']
-                continue
-
-            continue
-
-            if word['type'] == 'name':
-                skipped += 1
-                if debug:
-                    print 'Skipping word %s (%s) bc it is a name...' % (word['word'], word['def'])
                 continue
 
             types = [word['type']]
