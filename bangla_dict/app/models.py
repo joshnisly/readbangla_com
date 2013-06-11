@@ -9,7 +9,8 @@ PART_OF_SPEECH_CHOICES = (
     ('N', 'Noun'),
     ('P', 'Pronoun'),
     ('R', 'Preposition'),
-    ('V', 'Verb')
+    ('V', 'Verb'),
+    ('O', 'Proper noun'),
 )
 
 class Word(models.Model):
