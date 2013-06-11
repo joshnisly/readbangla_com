@@ -151,3 +151,32 @@ H5
     -webkit-border-radius: 4px;
 }
 
+.Pane
+{
+    position: absolute;
+    top: 2em;
+    bottom: 0;
+    width: 50%;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+.Pane > IFRAME
+{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    border: 0;
+}
+.ShowingSubTabBar .Pane
+{
+    top: 4em;
+}
+.HiddenPane
+{
+    display: none;
+}

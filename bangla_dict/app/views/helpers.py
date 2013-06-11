@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.template import Context, RequestContext, loader
 import json
+import urllib
 
 from app import email_send
 
@@ -82,11 +83,16 @@ def get_first_or_none(model, **kwargs):
         return objs[0]
     return None
 
+def get_samsad_url(word):
+    return 'http://dsalsrv02.uchicago.edu/cgi-bin/romadict.pl?query=%s&searchhws=yes&table=biswas-bengali' % \
+            urllib.quote_plus(word.encode('utf-8'))
+
 ############################### Internals
 def _get_page_structure():
     return (
         ('Home', '/', [
             ('Lookup', reverse('app.views.lookup.index')),
+            ('Phrase Lookup', reverse('app.views.lookup.phrase_lookup')),
             ('Recently Added', reverse('app.views.words.recently_added')),
         ], None, True),
         #('Scheduling', reverse('app.views.scheduling.month_view'), [], 'Scheduling (Horiaro)', True),

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Phrase Lookup{% endblock %}
+{% block content %}
+<style>
+.ResultWord
+{
+    display: inline-block;
+    vertical-align: top;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="/static/entry.css"/>
+
+<div class="Pane" style="padding: 1em">
+    <h2>Phrase lookup</h2>
+    <div>Please enter a phrase to transliterate:</div>
+    <form action="{% url app.views.lookup.phrase_lookup %}" method="POST">{% csrf_token %}
+    <input type="text" class="Bangla" name="Phrase" value="{{phrase}}"/>
+    <button type="submit" name="Action" value="Lookup">Transliterate</button>
+    </form>
+
+    <div id="Results">
+    {% for word in results %}
+        <div class="ResultWord">
+            <span class="Bangla">{{word.bangla}}</span><br/>
+            <span xword="{{word.bangla_match}}" xdefurl="{{word.pane_url}}">
+                {% if word.english %}
+                <a href="{{word.url}}">{{word.english}}</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+<div class="Pane" style="left: 50%; position: fixed">
+    <iframe id="DefIFrame" src="">
+    </iframe>
+</div>
+
+<script type="text/javascript" src="/static/phrase_lookup.js"></script>
+
+{% endblock %}
+
+

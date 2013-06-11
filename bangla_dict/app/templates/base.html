@@ -9,7 +9,7 @@
         <script type="text/javascript" src="/static/avro-1.1-beta.min.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/globals.css"/>
     </head>
-    <body>
+    <body class="{% if sub_links %}ShowingSubTabBar{% endif %}">
         <div id="TabBar">
             {% if request.user.is_authenticated %}
             <span id="AuthSpan">
