@@ -25,7 +25,7 @@ def auth_login(request):
     if request.method == 'POST':
         next_url = request.POST['next']
         form = LoginForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and form.cleaned_data['password'] != ' ':
             user = authenticate(username=form.cleaned_data['username'],
                                 password=form.cleaned_data['password'])
             if user:
@@ -103,7 +103,7 @@ def openid_finish(request):
                     email=request.session['email'],
                     is_active=False,
                     is_superuser=False)
-        user.set_password('')
+        user.set_password(' ')
         user.save()
         _send_signup_email(request, {
             'first_name': form.cleaned_data['first_name'],
@@ -200,7 +200,7 @@ def _on_verify_email(request, email, first_name=None, last_name=None):
                 'message': error
             })
         else:
-            user = authenticate(username=email, password='')
+            user = authenticate(username=email, password=' ')
             if not user:
                 error = 'There is a password assigned to this account.' + \
                         'Please log in with that password.'
