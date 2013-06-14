@@ -23,7 +23,7 @@ from app import db_helpers
 from app import models
 from app.views import helpers
 
-USER = models.get_automated_user('KM-words')
+USER = models.get_automated_user('WordList1')
 
 PARTS_OF_SPEECH = {
     'adj.': 'A',
@@ -68,9 +68,16 @@ def convert(input_path, debug):
             parts = _split_with_quotes(line.strip(), ',')
             word = dict(zip(['id', 'word', 'def', 'type', 'pronunciation'], parts))
 
+            # Ignore words without definitions.
             if not word['def']:
                 continue
 
+            # Skip phrases
+            if ' ' in word['word']:
+                skipped += 1
+                continue
+
+            # Ignore words with no part of speech
             if not word['type']:
                 skipped += 1
                 if debug:
