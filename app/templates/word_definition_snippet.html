@@ -1,7 +1,9 @@
 ({{definition.get_part_of_speech_display}})
 {{definition.english_word}}<br/>
 
+{% if definition.definition %}
 Definition: <span style="white-space: pre-word">{{definition.definition}}</span><br/>
+{% endif %}
 {% if definition.notes %}
 Notes: <span style="white-space: pre-word">{{definition.notes}}</span><br/>
 {% endif %}
