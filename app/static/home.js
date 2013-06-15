@@ -17,8 +17,11 @@ function isAscii(str)
 
 function onAjaxSuccess(result)
 {
-    if (result.word != $('#BanglaWord').val())
+    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
         return;
+
+    if (result.redirect_url)
+        window.location = result.redirect_url;
 
     lastResult = result.word;
 
@@ -29,11 +32,16 @@ function onAjaxSuccess(result)
     }
 
     $('#Throbber').hide();
-    $('#LookupBtn').show();
     $('#Results').empty()
+    if (result.dict_matches.length == 0 && result.word_matches.length == 0)
+    {
+        $('#Results').appendNewChild('H3').text('No matches for ' + result.word + ' found.');
+        return;
+    }
+
     if (result.dict_matches.length)
     {
-        $('#Results').appendNewChild('H3').text('Matches with definitions');
+        $('#Results').appendNewChild('H3').text('Matches for ' + result.word + ' with definitions');
         for (var i = 0; i < result.dict_matches.length; i++)
         {
             var match = result.dict_matches[i];
@@ -45,7 +53,7 @@ function onAjaxSuccess(result)
     }
     if (result.word_matches.length)
     {
-        $('#Results').appendNewChild('H3').text('Word matches');
+        $('#Results').appendNewChild('H3').text('Word matches for ' + result.word);
         for (var i = 0; i < result.word_matches.length; i++)
         {
             var match = result.word_matches[i];
@@ -60,14 +68,12 @@ function onAjaxSuccess(result)
 function doAjaxLookup()
 {
     var bangla = $('#BanglaWord').val();
-    if (!bangla || bangla == lastResult)
+    if (!bangla)
         return;
 
     if (isAscii(bangla))
-    {
         bangla = avro.parse(bangla);
-        $('#BanglaWord').val(bangla);
-    }
+
     $('#Throbber').show();
     $('#LookupBtn').hide();
     doAjax({
@@ -79,6 +85,7 @@ function doAjaxLookup()
 
 function onWordChange()
 {
+    $('#LookupBtn').show();
     if (timer)
     {
         window.clearTimeout(timer)
@@ -89,11 +96,17 @@ function onWordChange()
 
 $(document).ready(function() {
     $('#BanglaWord').bind('input', onWordChange);
+    $('INPUT[type=radio]').bind('change', onWordChange);
     $('#BanglaWord').bind('keydown', function(event) {
         if (event.keyCode == 13)
             doAjaxLookup();
     });
     $('#LookupBtn').bind('click', doAjaxLookup);
+
+    $('INPUT[type=radio]').bind('change', function(event) {
+        $('.RadioLabel').removeClass('Checked');
+        $(event.target).closest('LABEL').addClass('Checked');
+    })
 });
 
 })();

@@ -90,11 +90,7 @@ def get_samsad_url(word):
 ############################### Internals
 def _get_page_structure():
     return (
-        ('Home', '/', [
-            ('Lookup', reverse('app.views.lookup.index')),
-            ('Phrase Lookup', reverse('app.views.lookup.phrase_lookup')),
-            ('Recently Added', reverse('app.views.words.recently_added')),
-        ], None, True),
+        ('Home', '/', []),
         #('Scheduling', reverse('app.views.scheduling.month_view'), [], 'Scheduling (Horiaro)', True),
         ('Entry', reverse('app.views.entry.enter_new_word'), [
             ('Enter New Word', reverse('app.views.entry.enter_new_word')),

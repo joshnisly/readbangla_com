@@ -1,6 +1,7 @@
 
 def simple_correct_spelling(word):
     word = word.replace(u'\u0985\u09BE', u'\u0986')
+    word = word.replace(u'\u099C\u09AF\u09BC', u'\u099C\u09DF')
     return word
 
 
