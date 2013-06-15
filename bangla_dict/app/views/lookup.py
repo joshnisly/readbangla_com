@@ -45,6 +45,12 @@ def index(request):
 @helpers.json_entrypoint
 def lookup_ajax(request):
     word = request.JSON['word'].strip()
+    if ' ' in word:
+        return {
+            'word': request.JSON['word'],
+            'redirect_url': reverse(phrase_lookup, args=[word])
+        }
+
     word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
@@ -77,7 +83,6 @@ def lookup_ajax(request):
 def phrase_lookup(request, phrase_text=None):
     if not phrase_text and request.method == 'POST':
         phrase_text = request.POST['Phrase']
-
 
     phrase = ''
     results = []

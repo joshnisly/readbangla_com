@@ -9,7 +9,7 @@
         <script type="text/javascript" src="/static/avro-1.1-beta.min.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/globals.css"/>
     </head>
-    <body class="{% if sub_links %}ShowingSubTabBar{% endif %}">
+    <body>
         <div id="TabBar">
             {% if request.user.is_authenticated %}
             <span id="AuthSpan">
@@ -21,13 +21,9 @@
                 <a id="LogoutLink" href="/login/">Log In</a>
             </span>
             {% endif %}
-            <ul>
-            {% for link in top_links %}
-            <li class="{% if link.0.lower == top_link_name %}Active{% endif %}">
-                <a href="{{link.1}}">{% if link.3 %} {{link.3}} {% else %} {{link.0}} {% endif %}</a>
-            </li>
-            {% endfor %}
-            </ul>
+
+
+            <span id="TitleSpan"><a href="/">ReadBangla.com</a></span>
             <div style="clear: both"></div>
         </div>
         {% if sub_links %}
