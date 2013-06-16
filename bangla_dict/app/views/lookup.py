@@ -67,7 +67,8 @@ def lookup_ajax(request):
                 'word': match.word,
                 'defs': ['(%s) %s' % (x.get_part_of_speech_display(), x.english_word) \
                          for x in defs],
-                'view_url': reverse(words.view_word, args=[match.word])
+                'view_url': reverse(words.view_word, args=[match.word]),
+                'samsad_url': helpers.get_samsad_url(match.word),
             })
         else:
             match = helpers.get_first_or_none(models.ExternalWord, word=root)
@@ -76,6 +77,7 @@ def lookup_ajax(request):
                     'word': match.word,
                     'view_url': reverse(words.view_word, args=[match.word]),
                     'add_def_url': reverse(entry.enter_definition, args=[match.word]),
+                    'samsad_url': helpers.get_samsad_url(match.word),
                 })
 
     return result
