@@ -161,7 +161,7 @@ H5
 .Pane
 {
     position: absolute;
-    top: 2.2em;
+    top: 2.3em;
     bottom: 0;
     width: 50%;
     left: 0;
@@ -186,4 +186,12 @@ H5
 .HiddenPane
 {
     display: none;
+}
+
+.LinkLikeButton
+{
+    background-color: transparent;
+    border: 0;
+    color: blue;
+    font-size: 10pt;
 }

@@ -25,12 +25,6 @@ function onAjaxSuccess(result)
 
     lastResult = result.word;
 
-    if (result.dict_matches.length + result.word_matches.length == 1 && false)
-    {
-        var singleMatch = result.dict_matches.length > 0 ? result.dict_matches[0] : result.word_matches[0];
-        window.location = singleMatch.view_url;
-    }
-
     $('#Throbber').hide();
     $('#Results').empty()
     if (result.dict_matches.length == 0 && result.word_matches.length == 0)
@@ -58,7 +52,15 @@ function onAjaxSuccess(result)
         {
             var match = result.word_matches[i];
             var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch');
-            wordWrapper.appendNewChild('SPAN', '', 'Bangla').text(match.word + ' - ');
+            wordWrapper.appendNewChild('SPAN', '', 'Bangla').text(match.word + ' -');
+            var button = wordWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton');
+            button.text('Samsad').attr('xurl', match.samsad_url);
+            button.bind('click', function(event) {
+                var pane = $('#SamsadPane')[0];
+                var url = $(event.target).attr('xurl');
+                if (pane.src != url)
+                    pane.src = url;
+            });
             wordWrapper.appendNewChild('A').text('Add definition').attr('href', match.add_def_url);
             wordWrapper.appendNewChild('SPAN').text(' Request definition');
         }
