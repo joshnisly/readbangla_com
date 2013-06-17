@@ -2,6 +2,7 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="/static/entry.css"/>
+<link rel="stylesheet" type="text/css" href="/static/home.css"/>
 <div class="Pane" style="padding: 0.5em">
     <div style="margin-top: 1em">
         <table><tr>
@@ -16,7 +17,7 @@
 
     <div style="margin-top: 5em">There are currently {{num_words}} words in the dictionary.</div>
     <div class="Links">
-        <a href="/">Recently added words</a> |
+        <a href="{% url app.views.words.recently_added %}">Recently added words</a> |
         <a href="/">Random word</a>
     </div>
 </div>
