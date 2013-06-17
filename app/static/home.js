@@ -27,6 +27,7 @@ function onAjaxSuccess(result)
 
     $('#Throbber').hide();
     $('#Results').empty()
+    $('#SamsadPane')[0].src = '';
     if (result.dict_matches.length == 0 && result.word_matches.length == 0)
     {
         $('#Results').appendNewChild('H3').text('No matches for ' + result.word + ' found.');
@@ -72,6 +73,8 @@ function doAjaxLookup()
     var bangla = $('#BanglaWord').val();
     if (!bangla)
         return;
+
+    window.clearTimeout(timer);
 
     if (isAscii(bangla))
         bangla = avro.parse(bangla);
