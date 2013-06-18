@@ -7,7 +7,7 @@ function isAscii(str)
 {
     for (var i = 0; i < str.length; i++)
     {
-        if (str[i] < 32 || str[i] > 126)
+        if (str[i] > 126)
             return false;
     }
 
@@ -57,27 +57,15 @@ function createDefSection(word, parent)
     }
     var bottomWrapper = wrapper.appendNewChild('DIV');
     var button = bottomWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton');
-    button.bind('click', function(event) {
-        loadSamsadPane(word.samsad_url);
-    });
+    button.attr('xsamsadurl', word.samsad_url);
     button.text('Samsad');
     bottomWrapper.appendNewChild('A').attr('href', word.add_def_url).text('Add Definition');
 }
 
-function onAjaxSuccess(result)
+function createSingleWordResults(result)
 {
-    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
-        return;
-
-    if (result.redirect_url)
-        window.location = result.redirect_url;
-
-    lastResult = result.word;
-
     var resultsElem = $('#Results');
-    $('#Throbber').hide();
-    resultsElem.empty()
-    $('#SamsadPane')[0].src = '';
+
     if (result.dict_matches.length == 0 && result.word_matches.length == 0)
     {
         resultsElem.appendNewChild('H3').text('No matches for ' + result.word + ' found.');
@@ -98,6 +86,57 @@ function onAjaxSuccess(result)
         var match = result.word_matches[i];
         createDefSection(match, resultsElem);
     }
+}
+
+function createPhraseResults(result)
+{
+    var resultsElem = $('#Results');
+    resultsElem.appendNewChild('H3').text('Transliteration');
+    for (var i = 0; i < result.words.length; i++)
+    {
+        var word = result.words[i];
+        var wordWrapper = resultsElem.appendNewChild('DIV', '', 'ResultWord');
+        wordWrapper.appendNewChild('SPAN', '', 'Bangla').text(word.word);
+        wordWrapper.appendNewChild('BR');
+        if (word.dict_matches.length)
+        {
+            var match = word.dict_matches[0];
+            var def = match.defs[0];
+            var samsadBtn = wordWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton Bangla');
+            samsadBtn.attr('xsamsadurl', match.samsad_url);
+            samsadBtn.attr('xdef', word);
+            samsadBtn.text(def.english_word);
+        }
+        else if (word.word_matches.length)
+        {
+            var match = word.word_matches[0];
+            var samsadBtn = wordWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton Bangla');
+            samsadBtn.attr('xsamsadurl', match.samsad_url);
+            samsadBtn.attr('xdef', word);
+            samsadBtn.text(match.word);
+        }
+    }
+}
+
+function onAjaxSuccess(result)
+{
+    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
+        return;
+
+    if (result.redirect_url)
+        window.location = result.redirect_url;
+
+    lastResult = result.word;
+
+    var resultsElem = $('#Results');
+    $('#Throbber').hide();
+    resultsElem.empty()
+    $('#SamsadPane')[0].src = '';
+
+    if (result.phrase)
+        createPhraseResults(result);
+    else
+        createSingleWordResults(result);
 }
 
 function doAjaxLookup()
@@ -139,6 +178,14 @@ $(document).ready(function() {
 
     if ($('#BanglaWord').val())
         doAjaxLookup();
+
+    $(document).bind('click', function(event) {
+        var button = $(event.target).closest('BUTTON[xsamsadurl]');
+        if (!button.length)
+            return;
+
+        loadSamsadPane(button.attr('xsamsadurl'));
+    });
 });
 
 })();

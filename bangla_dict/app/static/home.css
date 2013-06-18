@@ -28,6 +28,10 @@
     font-size: 18pt;
     line-height: 18pt;
 }
+.WordTitle A:hover
+{
+    text-decoration: none;
+}
 
 .DefSection
 {
@@ -37,4 +41,10 @@
 .WordSection
 {
     margin-bottom: 1.5em;
+}
+.ResultWord
+{
+    display: inline-block;
+    vertical-align: top;
+    margin: 0 0.5em 1em 0;
 }

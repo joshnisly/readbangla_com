@@ -28,10 +28,16 @@ def index(request, word=None):
 def lookup_ajax(request):
     word = request.JSON['word'].strip()
     if ' ' in word:
-        return {
+        phrase_words = word.split(' ')
+        result = {
+            'phrase': True,
             'word': request.JSON['word'],
-            'redirect_url': reverse(phrase_lookup, args=[word])
+            'words': []
         }
+        for phrase_word in phrase_words:
+            result['words'].append(_get_json_for_word(phrase_word))
+
+        return result
 
     return _get_json_for_word(request.JSON['word'])
 
