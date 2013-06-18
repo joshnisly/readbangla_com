@@ -11,7 +11,7 @@
     <tbody>
         {% for word in words %}
         <tr>
-            <td class="Bangla"><a href="{% url app.views.words.view_word word.word %}">{{word.word}}</a></td>
+            <td class="Bangla"><a href="{% url app.views.lookup.index word.word %}">{{word.word}}</a></td>
             <td>{{word.added_by}}</td>
             <td>{{word.added_on}}</td>
         <tr>

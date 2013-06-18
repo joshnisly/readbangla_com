@@ -8,6 +8,11 @@
     font-weight: bold;
 }
 
+#Results
+{
+    margin-top: 2em;
+}
+
 #Results H3
 {
     margin-top: 2em;
@@ -16,4 +21,20 @@
 #Results BUTTON
 {
     cursor: pointer;
+}
+
+.WordTitle
+{
+    font-size: 18pt;
+    line-height: 18pt;
+}
+
+.DefSection
+{
+    white-space: pre;
+}
+
+.WordSection
+{
+    margin-bottom: 1.5em;
 }

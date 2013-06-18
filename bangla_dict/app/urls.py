@@ -3,13 +3,12 @@ from django.conf.urls.defaults import patterns, include, url
 import app.views.auth
 import app.views.entry
 import app.views.help
-import app.views.home
 import app.views.lookup
 import app.views.words
 
 urlpatterns = patterns('',
-    (r'^$', app.views.home.index),
-    (r'^word/(.+)/$', app.views.words.view_word),
+    (r'^$', app.views.lookup.index),
+    (r'^lookup/(.+)/$', app.views.lookup.index),
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
     (r'^words/phrase_lookup/$', app.views.lookup.phrase_lookup),

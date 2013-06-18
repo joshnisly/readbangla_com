@@ -60,13 +60,6 @@ class ExternalWord(models.Model):
 
 admin.site.register(ExternalWord)
 
-#class AudioRecording(models.Model):
-#    word = models.ForeignKey(Word)
-#    audio = models.FileField()
-#
-#    added_by = models.ForeignKey(auth_models.User)
-#    added_on = models.DateTimeField(auto_now_add=True)
-
 def get_automated_user(desc):
     username = '%s_automated' % desc
     return auth_models.User.objects.get_or_create(username=username,

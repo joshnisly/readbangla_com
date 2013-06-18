@@ -4,41 +4,23 @@ from django.contrib.auth import decorators, authenticate, login, logout
 from django.core.urlresolvers import reverse
 from django import forms
 from django.http import HttpResponseRedirect
+import json
 
 import entry
 import helpers
 import words
 
 from app import models
+from app import db_helpers
 from app import word_helpers
 
 ################################# Entrypoints
-def index(request):
-    if request.method == 'POST':
-        if request.POST.get('Bangla'):
-            return HttpResponseRedirect(reverse(words.view_word,
-                                                args=[request.POST['Bangla']]))
-        elif request.POST.get('English'):
-            defs = models.Definition.objects.all()
-            defs = defs.filter(english_word__contains=request.POST['English'])
-            if len(defs):
-                word_ids = set([x.word_id for x in defs])
-                if len(word_ids) > 1:
-                    word_matches = models.Word.objects.filter(id__in=word_ids).order_by('word')
-                    return helpers.run_template(request, 'home__lookup__multiple_matches', {
-                        'search_word': request.POST['English'],
-                        'words': word_matches
-                    })
-
-                word = defs[0].word
-                return HttpResponseRedirect(reverse(words.view_word,
-                                                    args=[word.word]))
-            else:
-                return helpers.run_template(request, 'word_not_found', {
-                    'english': request.POST['English']
-                })
-
-    return helpers.run_template(request, 'home__lookup', {
+def index(request, word=None):
+    num_words = models.Word.objects.all().count()
+    return helpers.run_template(request, 'home', {
+        'num_words': num_words,
+        'word': word,
+        'parts_of_speech': json.dumps(models.PART_OF_SPEECH_CHOICES)
     })
 
 @csrf_exempt
@@ -51,36 +33,8 @@ def lookup_ajax(request):
             'redirect_url': reverse(phrase_lookup, args=[word])
         }
 
-    word = word_helpers.simple_correct_spelling(word)
-    root_words = word_helpers.get_possible_roots(word)
-    result = {
-        'word': request.JSON['word'],
-        'corrected_word': word,
-        'dict_matches': [],
-        'word_matches': [],
-    }
-    for root in [word] + root_words:
-        match = helpers.get_first_or_none(models.Word, word=root)
-        if match:
-            defs = match.definitions.all()
-            result['dict_matches'].append({
-                'word': match.word,
-                'defs': ['(%s) %s' % (x.get_part_of_speech_display(), x.english_word) \
-                         for x in defs],
-                'view_url': reverse(words.view_word, args=[match.word]),
-                'samsad_url': helpers.get_samsad_url(match.word),
-            })
-        else:
-            match = helpers.get_first_or_none(models.ExternalWord, word=root)
-            if match:
-                result['word_matches'].append({
-                    'word': match.word,
-                    'view_url': reverse(words.view_word, args=[match.word]),
-                    'add_def_url': reverse(entry.enter_definition, args=[match.word]),
-                    'samsad_url': helpers.get_samsad_url(match.word),
-                })
+    return _get_json_for_word(request.JSON['word'])
 
-    return result
 
 def phrase_lookup(request, phrase_text=None):
     if not phrase_text and request.method == 'POST':
@@ -128,4 +82,38 @@ def phrase_lookup(request, phrase_text=None):
         'phrase': phrase_text or '',
         'results': results
     })
+
+##################### Internal
+def _get_json_for_word(word_str):
+    word = word_str.strip()
+    word = word_helpers.simple_correct_spelling(word)
+    root_words = word_helpers.get_possible_roots(word)
+    result = {
+        'word': word_str,
+        'corrected_word': word,
+        'dict_matches': [],
+        'word_matches': [],
+    }
+    for root in [word] + root_words:
+        match = helpers.get_first_or_none(models.Word, word=root)
+        if match:
+            defs = match.definitions.all()
+            result['dict_matches'].append({
+                'word': match.word,
+                'defs': [db_helpers.model_to_dict(x) for x in defs],
+                'view_url': reverse(index, args=[match.word]),
+                'samsad_url': helpers.get_samsad_url(match.word),
+                'add_def_url': reverse(entry.enter_definition, args=[match.word]),
+            })
+        else:
+            match = helpers.get_first_or_none(models.ExternalWord, word=root)
+            if match:
+                result['word_matches'].append({
+                    'word': match.word,
+                    'view_url': reverse(index, args=[match.word]),
+                    'add_def_url': reverse(entry.enter_definition, args=[match.word]),
+                    'samsad_url': helpers.get_samsad_url(match.word),
+                })
+
+    return result
 
