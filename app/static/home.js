@@ -1,5 +1,4 @@
 (function() {
-var timer = null;
 var lookupUrl = '/words/lookup/ajax/';
 var avro = OmicronLab.Avro.Phonetic;
 var lastResult = null;
@@ -15,6 +14,56 @@ function isAscii(str)
     return true;
 }
 
+function getPartOfSpeechDisplay(type)
+{
+    for (var i = 0; i < partsOfSpeech.length; i++)
+    {
+        if (partsOfSpeech[i][0] == type)
+           return partsOfSpeech[i][1];
+    }
+    return '(Unknown)';
+}
+
+function loadSamsadPane(url)
+{
+    var pane = $('#SamsadPane')[0];
+    if (pane.src != url)
+        pane.src = url;
+};
+
+function createDefSection(word, parent)
+{
+    var wrapper = parent.appendNewChild('DIV', '', 'WordSection')
+    var titleElem = wrapper.appendNewChild('DIV', '', 'WordTitle Bangla');
+    titleElem.appendNewChild('A').attr('href', word.view_url).text(word.word);
+    if (word.defs)
+    {
+        for (var i = 0; i < word.defs.length; i++)
+        {
+            var def = word.defs[i];
+            var defLine = '(' + getPartOfSpeechDisplay(def.part_of_speech) + ') ' + def.english_word;
+            wrapper.appendNewChild('DIV').appendNewChild('SPAN').text(defLine);
+            if (def.definition)
+            {
+                var defLine = 'Definition: ' + def.definition;
+                wrapper.appendNewChild('DIV', '', 'DefSection').text(defLine);
+            }
+            if (def.notes)
+            {
+                var notesLine = 'Notes: ' + def.notes;
+                wrapper.appendNewChild('DIV', '', 'DefSection').text(notesLine);
+            }
+        }
+    }
+    var bottomWrapper = wrapper.appendNewChild('DIV');
+    var button = bottomWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton');
+    button.bind('click', function(event) {
+        loadSamsadPane(word.samsad_url);
+    });
+    button.text('Samsad');
+    bottomWrapper.appendNewChild('A').attr('href', word.add_def_url).text('Add Definition');
+}
+
 function onAjaxSuccess(result)
 {
     if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
@@ -25,46 +74,29 @@ function onAjaxSuccess(result)
 
     lastResult = result.word;
 
+    var resultsElem = $('#Results');
     $('#Throbber').hide();
-    $('#Results').empty()
+    resultsElem.empty()
     $('#SamsadPane')[0].src = '';
     if (result.dict_matches.length == 0 && result.word_matches.length == 0)
     {
-        $('#Results').appendNewChild('H3').text('No matches for ' + result.word + ' found.');
+        resultsElem.appendNewChild('H3').text('No matches for ' + result.word + ' found.');
         return;
     }
 
-    if (result.dict_matches.length)
+    for (var i = 0; i < result.dict_matches.length; i++)
     {
-        $('#Results').appendNewChild('H3').text('Matches for ' + result.word + ' with definitions');
-        for (var i = 0; i < result.dict_matches.length; i++)
-        {
-            var match = result.dict_matches[i];
-            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch WithDef');
-            wordWrapper.appendNewChild('A', '', 'Bangla').text(match.word).attr('href', match.view_url);
-            for (var iDef = 0; iDef < match.defs.length; iDef++)
-                wordWrapper.appendNewChild('SPAN').text(' - ' + match.defs[iDef]);
-        }
+        var match = result.dict_matches[i];
+        createDefSection(match, resultsElem);
     }
+
     if (result.word_matches.length)
+        resultsElem.appendNewChild('H3').text('Possible matches');
+
+    for (var i = 0; i < result.word_matches.length; i++)
     {
-        $('#Results').appendNewChild('H3').text('Word matches for ' + result.word);
-        for (var i = 0; i < result.word_matches.length; i++)
-        {
-            var match = result.word_matches[i];
-            var wordWrapper = $('#Results').appendNewChild('DIV', '', 'WordMatch');
-            wordWrapper.appendNewChild('SPAN', '', 'Bangla').text(match.word + ' -');
-            var button = wordWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton');
-            button.text('Samsad').attr('xurl', match.samsad_url);
-            button.bind('click', function(event) {
-                var pane = $('#SamsadPane')[0];
-                var url = $(event.target).attr('xurl');
-                if (pane.src != url)
-                    pane.src = url;
-            });
-            wordWrapper.appendNewChild('A').text('Add definition').attr('href', match.add_def_url);
-            wordWrapper.appendNewChild('SPAN').text(' Request definition');
-        }
+        var match = result.word_matches[i];
+        createDefSection(match, resultsElem);
     }
 }
 
@@ -73,8 +105,6 @@ function doAjaxLookup()
     var bangla = $('#BanglaWord').val();
     if (!bangla)
         return;
-
-    window.clearTimeout(timer);
 
     if (isAscii(bangla))
         bangla = avro.parse(bangla);
@@ -91,12 +121,6 @@ function doAjaxLookup()
 function onWordChange()
 {
     $('#LookupBtn').show();
-    if (timer)
-    {
-        window.clearTimeout(timer)
-        timer = null;
-    }
-    timer = window.setTimeout(doAjaxLookup, 2000);
 }
 
 $(document).ready(function() {
@@ -112,6 +136,9 @@ $(document).ready(function() {
         $('.RadioLabel').removeClass('Checked');
         $(event.target).closest('LABEL').addClass('Checked');
     })
+
+    if ($('#BanglaWord').val())
+        doAjaxLookup();
 });
 
 })();

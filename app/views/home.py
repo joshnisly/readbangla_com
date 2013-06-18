@@ -7,12 +7,4 @@ import helpers
 
 from app import models
 
-################################# Entrypoints
-def index(request):
-    num_words = models.Word.objects.all().count()
-    return helpers.run_template(request, 'home', {
-        'num_words': num_words
-    })
-
-
 
