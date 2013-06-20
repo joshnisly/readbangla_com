@@ -118,25 +118,31 @@ function createPhraseResults(result)
     }
 }
 
-function onAjaxSuccess(result)
+function handleResults(result)
 {
-    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
-        return;
-
-    if (result.redirect_url)
-        window.location = result.redirect_url;
-
+    var isFirstHit = !lastResult;
     lastResult = result.word;
+
+    if (window.History && result.word_url && result.word_url != window.location.pathname)
+        window.History.pushState(result, null, result.word_url);
 
     var resultsElem = $('#Results');
     $('#Throbber').hide();
     resultsElem.empty()
-    $('#SamsadPane')[0].src = '';
+    $('#SamsadPane')[0].contentWindow.location.replace('about:blank');
 
     if (result.phrase)
         createPhraseResults(result);
     else
         createSingleWordResults(result);
+}
+
+function onAjaxSuccess(result)
+{
+    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
+        return;
+
+    handleResults(result);
 }
 
 function doAjaxLookup()
@@ -185,6 +191,16 @@ $(document).ready(function() {
             return;
 
         loadSamsadPane(button.attr('xsamsadurl'));
+    });
+
+    History.Adapter.bind(window,'popstate',function() {
+        var state = History.getState(); // Note: We are using History.getState() instead of event.state
+        if (state)
+        {
+            var result = state.data;
+            $('#BanglaWord').val(result.word);
+            handleResults(result);
+        }
     });
 });
 

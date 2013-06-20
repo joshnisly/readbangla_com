@@ -32,6 +32,7 @@ def lookup_ajax(request):
         result = {
             'phrase': True,
             'word': request.JSON['word'],
+            'word_url': reverse(index, args=[word_str]),
             'words': []
         }
         for phrase_word in phrase_words:
@@ -96,6 +97,7 @@ def _get_json_for_word(word_str):
     root_words = word_helpers.get_possible_roots(word)
     result = {
         'word': word_str,
+        'word_url': reverse(index, args=[word_str]),
         'corrected_word': word,
         'dict_matches': [],
         'word_matches': [],
