@@ -17,30 +17,21 @@ from app import word_helpers
 ################################# Entrypoints
 def index(request, word=None):
     num_words = models.Word.objects.all().count()
+    json_str = ''
+    if word:
+        json_str = json.dumps(_get_ajax_json_for_word_or_phrase(word))
     return helpers.run_template(request, 'home', {
         'num_words': num_words,
         'word': word,
-        'parts_of_speech': json.dumps(models.PART_OF_SPEECH_CHOICES)
+        'parts_of_speech': json.dumps(models.PART_OF_SPEECH_CHOICES),
+        'word_data': json_str
     })
 
 @csrf_exempt
 @helpers.json_entrypoint
 def lookup_ajax(request):
-    word = request.JSON['word'].strip()
-    if ' ' in word:
-        phrase_words = word.split(' ')
-        result = {
-            'phrase': True,
-            'word': request.JSON['word'],
-            'word_url': reverse(index, args=[word]),
-            'words': []
-        }
-        for phrase_word in phrase_words:
-            result['words'].append(_get_json_for_word(phrase_word))
-
-        return result
-
-    return _get_json_for_word(request.JSON['word'])
+    import time; time.sleep(0.5);
+    return _get_ajax_json_for_word_or_phrase(request.JSON['word'])
 
 
 def phrase_lookup(request, phrase_text=None):
@@ -91,6 +82,23 @@ def phrase_lookup(request, phrase_text=None):
     })
 
 ##################### Internal
+def _get_ajax_json_for_word_or_phrase(input_str):
+    word = input_str.strip()
+    if ' ' in word:
+        phrase_words = word.split(' ')
+        result = {
+            'phrase': True,
+            'word': input_str,
+            'word_url': reverse(index, args=[word]),
+            'words': []
+        }
+        for phrase_word in phrase_words:
+            result['words'].append(_get_json_for_word(phrase_word))
+
+        return result
+
+    return _get_json_for_word(input_str)
+    
 def _get_json_for_word(word_str):
     word = word_str.strip()
     word = word_helpers.simple_correct_spelling(word)
