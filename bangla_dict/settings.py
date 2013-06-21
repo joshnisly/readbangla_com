@@ -113,6 +113,8 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'bangla_dict.urls'
 
+AUTH_PROFILE_MODULE='app.UserProfile'
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
