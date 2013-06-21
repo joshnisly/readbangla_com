@@ -12,32 +12,6 @@ import lookup
 from app import models
 
 ################################# Entrypoints
-def view_word(request, word_str):
-    words = models.Word.objects.filter(word=word_str)
-    word = None
-    definitions = []
-    new_def_form = None
-    if len(words):
-        word = words[0]
-
-        definitions = word.definitions.all()
-        if request.user.is_authenticated:
-            definitions = []
-            for definition in word.definitions.all():
-                definitions.append({
-                    'form': DefinitionForm(instance=definition),
-                    'definition': definition
-                })
-        new_def_form = DefinitionForm(initial={'word': word})
-
-    return helpers.run_template(request, 'view_word', {
-        'word': word,
-        'word_str': word_str,
-        'samsad_url': helpers.get_samsad_url(word_str),
-        'definitions': definitions,
-        'new_def_form': new_def_form
-    })
-
 def recently_added(request):
     words = models.Word.objects.order_by('-added_on')[:100]
     return helpers.run_template(request, 'home__recently_added', {
