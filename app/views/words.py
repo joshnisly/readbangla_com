@@ -52,7 +52,7 @@ def edit_def(request, def_id):
     assert request.method == 'POST'
 
     word_def = get_object_or_404(models.Definition, pk=def_id)
-    assert word_def.added_by == request.user or request.user.is_superuser
+    assert word_def.added_by == request.user.get_profile() or request.user.is_superuser
 
     form = DefinitionForm(request.POST, instance=word_def)
     if not form.is_valid():
@@ -73,7 +73,7 @@ def add_def(request, word_id):
         assert False
     instance = form.save(commit=False)
     instance.word = word
-    instance.added_by = request.user
+    instance.added_by = request.user.get_profile()
     instance.save()
     return HttpResponseRedirect(reverse(view_word, args=[word.word]))
 
@@ -97,7 +97,7 @@ def delete_def(request):
 
     def_id = request.JSON['def_id']
     word_def = get_object_or_404(models.Definition, pk=def_id)
-    assert word_def.added_by == request.user or request.user.is_superuser
+    assert word_def.added_by == request.user.get_profile() or request.user.is_superuser
 
     word = word_def.word
     word_def.delete()

@@ -1,7 +1,9 @@
 from django.db import models
 
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 import django.contrib.auth.models as auth_models
+from django.db.models.signals import post_save
 
 PART_OF_SPEECH_CHOICES = (
     ('A', 'Adjective'),
@@ -13,9 +15,33 @@ PART_OF_SPEECH_CHOICES = (
     ('O', 'Proper noun'),
 )
 
+class UserProfile(models.Model):
+    user = models.ForeignKey(auth_models.User, unique=True) 
+
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user.first_name + ' ' + self.user.last_name
+
+def on_user_save(sender, instance, **kwargs):
+    profile, new = UserProfile.objects.get_or_create(user=instance)
+post_save.connect(on_user_save, sender=auth_models.User)
+
+class ProfileInline(admin.StackedInline):
+    model = UserProfile
+    fields = ('user',)
+    extra = 0
+
+class ProfileUserAdmin(UserAdmin):
+    inlines = [ProfileInline]
+
+admin.site.unregister(auth_models.User)
+admin.site.register(auth_models.User, ProfileUserAdmin)
+
+
 class Word(models.Model):
     word = models.CharField(max_length=50, unique=True)
-    added_by = models.ForeignKey(auth_models.User)
+    added_by = models.ForeignKey(UserProfile)
     added_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -30,7 +56,7 @@ class Definition(models.Model):
     definition = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
-    added_by = models.ForeignKey(auth_models.User)
+    added_by = models.ForeignKey(UserProfile)
     added_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -42,7 +68,7 @@ class FlaggedDefinition(models.Model):
     definition = models.ForeignKey(Definition)
     reason = models.TextField()
 
-    flagged_by = models.ForeignKey(auth_models.User)
+    flagged_by = models.ForeignKey(UserProfile)
     flagged_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -62,7 +88,7 @@ admin.site.register(ExternalWord)
 
 def get_automated_user(desc):
     username = '%s_automated' % desc
-    return auth_models.User.objects.get_or_create(username=username,
+    user = auth_models.User.objects.get_or_create(username=username,
                                                   defaults={
                                                       'username': username,
                                                       'email': '',
@@ -70,3 +96,4 @@ def get_automated_user(desc):
                                                       'first_name': desc,
                                                       'last_name': '(automated)',
                                                   })[0]
+    return user.get_profile()

@@ -5,6 +5,7 @@ from django import forms
 from django.http import HttpResponseRedirect
 
 import helpers
+import lookup
 import words
 
 from app import models
@@ -29,9 +30,9 @@ def enter_new_word(request):
                                   english_word=def_data['english_word'],
                                   definition=def_data['definition'],
                                   notes=def_data['notes'],
-                                  added_by=request.user)
+                                  added_by=request.user.get_profile())
 
-            return HttpResponseRedirect(reverse(words.view_word,
+            return HttpResponseRedirect(reverse(lookup.index,
                                                 args=[word.word]))
 
     return helpers.run_template(request, 'entry__enter_new_word', {
@@ -56,9 +57,9 @@ def enter_definition(request, word_str=None):
                                   english_word=def_data['english_word'],
                                   definition=def_data['definition'],
                                   notes=def_data['notes'],
-                                  added_by=request.user)
+                                  added_by=request.user.get_profile())
 
-            return HttpResponseRedirect(reverse(words.view_word,
+            return HttpResponseRedirect(reverse(lookup.index,
                                                 args=[word.word]))
 
     existing_defs = []
