@@ -30,7 +30,6 @@ def index(request, word=None):
 @csrf_exempt
 @helpers.json_entrypoint
 def lookup_ajax(request):
-    import time; time.sleep(0.5);
     return _get_ajax_json_for_word_or_phrase(request.JSON['word'])
 
 

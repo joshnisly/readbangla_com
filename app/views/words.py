@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 import urllib
 
 import helpers
+import lookup
 
 from app import models
 
@@ -43,6 +44,10 @@ def recently_added(request):
         'words': words
     })
 
+def random(request):
+    word = models.Word.objects.order_by('?')[0]
+    return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
+
 @login_required
 def request_new_word(request):
     assert request.method == 'POST'
@@ -59,7 +64,7 @@ def edit_def(request, def_id):
         print form.errors
         assert False
     form.save()
-    return HttpResponseRedirect(reverse(view_word, args=[word_def.word.word]))
+    return HttpResponseRedirect(reverse(lookup.index, args=[word_def.word.word]))
 
 @login_required
 def add_def(request, word_id):
@@ -75,7 +80,7 @@ def add_def(request, word_id):
     instance.word = word
     instance.added_by = request.user.get_profile()
     instance.save()
-    return HttpResponseRedirect(reverse(view_word, args=[word.word]))
+    return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
 
 @login_required
 @helpers.json_entrypoint

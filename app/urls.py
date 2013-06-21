@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     (r'^words/phrase_lookup/$', app.views.lookup.phrase_lookup),
     (r'^words/phrase_lookup/(.+)/$', app.views.lookup.phrase_lookup),
     (r'^words/request_new/$', app.views.words.request_new_word),
+    (r'^words/random/$', app.views.words.random),
 
     # Entry
     (r'^entry/new_word/$', app.views.entry.enter_new_word),
