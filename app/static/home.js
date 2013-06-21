@@ -198,7 +198,14 @@ $(document).ready(function() {
         $(event.target).closest('LABEL').addClass('Checked');
     })
 
-    if ($('#BanglaWord').val())
+    var preloadedData = $('#Results').attr('xWordData');
+    if (preloadedData)
+    {
+        preloadedData = JSON.parse(preloadedData);
+        handleResults(preloadedData);
+        $('#LookupBtn').hide();
+    }
+    else if ($('#BanglaWord').val())
         doAjaxLookup();
 
     $(document).bind('click', function(event) {
