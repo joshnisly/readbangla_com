@@ -28,7 +28,7 @@ function loadSamsadPane(url)
 {
     var pane = $('#SamsadPane')[0];
     if (pane.src != url)
-        pane.src = url;
+        $('#SamsadPane')[0].contentWindow.location.replace(url);
 };
 
 function createDefSection(word, parent)
@@ -95,6 +95,12 @@ function createSingleWordResults(result)
         var match = result.word_matches[i];
         createDefSection(match, resultsElem);
     }
+
+    if (result.dict_matches.length + result.word_matches.length == 1)
+    {
+        var singleResult = result.dict_matches[0] || result.word_matches[0];
+        loadSamsadPane(singleResult.samsad_url);
+    }
 }
 
 function createPhraseResults(result)
@@ -129,16 +135,15 @@ function createPhraseResults(result)
 
 function handleResults(result)
 {
-    var isFirstHit = !lastResult;
     lastResult = result.word;
 
     if (window.History && result.word_url && result.word_url != window.location.pathname)
-        window.History.pushState(result, null, result.word_url);
+        window.History.pushState(result, 'Lookup results', result.word_url);
 
     var resultsElem = $('#Results');
     $('#Throbber').hide();
     resultsElem.empty()
-    $('#SamsadPane')[0].contentWindow.location.replace('about:blank');
+    loadSamsadPane('about:blank');
 
     if (result.phrase)
         createPhraseResults(result);
