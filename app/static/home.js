@@ -168,6 +168,8 @@ function doAjaxLookup()
     if (isAscii(bangla))
         bangla = avro.parse(bangla);
 
+    $('#BanglaWord').val(bangla);
+
     $('#Throbber').show();
     $('#LookupBtn').hide();
     doAjax({
