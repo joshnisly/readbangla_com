@@ -50,7 +50,7 @@ def enter_definition(request, word_str=None):
             word = helpers.get_first_or_none(models.Word, word=word_str)
             if not word:
                 word = models.Word.objects.create(word=word_str,
-                                                  added_by=request.user)
+                                                  added_by=request.user.get_profile())
             def_data = definition_form.cleaned_data
             definition = models.Definition.objects.create(word=word,
                                   part_of_speech=def_data['part_of_speech'],

@@ -32,7 +32,7 @@ def lookup_ajax(request):
         result = {
             'phrase': True,
             'word': request.JSON['word'],
-            'word_url': reverse(index, args=[word_str]),
+            'word_url': reverse(index, args=[word]),
             'words': []
         }
         for phrase_word in phrase_words:
@@ -122,6 +122,10 @@ def _get_json_for_word(word_str):
                     'add_def_url': reverse(entry.enter_definition, args=[match.word]),
                     'samsad_url': helpers.get_samsad_url(match.word),
                 })
+
+    words = [x['word'] for x in result['dict_matches'] + result['word_matches']]
+    if not word in words:
+        result['add_def_url'] = reverse(entry.enter_definition, args=[word])
 
     return result
 

@@ -66,11 +66,20 @@ function createSingleWordResults(result)
 {
     var resultsElem = $('#Results');
 
-    if (result.dict_matches.length == 0 && result.word_matches.length == 0)
-    {
+    var hasResults = result.dict_matches.length || result.word_matches.length;
+
+    if (!hasResults)
         resultsElem.appendNewChild('H3').text('No matches for ' + result.word + ' found.');
-        return;
+
+    if (result.add_def_url)
+    {
+        var addDefLink = resultsElem.appendNewChild('A');
+        addDefLink.text('Add Definition for ' + result.word);
+        addDefLink.attr('href', result.add_def_url);
     }
+
+    if (!hasResults)
+        return;
 
     for (var i = 0; i < result.dict_matches.length; i++)
     {
