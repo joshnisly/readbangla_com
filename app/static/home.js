@@ -159,6 +159,15 @@ function onAjaxSuccess(result)
     handleResults(result);
 }
 
+function onAjaxError()
+{
+    $('#Results').empty();
+    $('#Results').appendNewChild('H3').text('Unable to lookup word.');
+    $('#Throbber').hide();
+    $('#LookupBtn').show();
+    $('#LookupBtn').addClass('invBtnDanger').text('Retry');
+}
+
 function doAjaxLookup()
 {
     var bangla = $('#BanglaWord').val();
@@ -170,12 +179,18 @@ function doAjaxLookup()
 
     $('#BanglaWord').val(bangla);
 
+    // Clear any prior errors
+    $('#LookupBtn').text('Lookup').removeClass('invBtnDanger');
+
+    $('#Results').empty();
     $('#Throbber').show();
     $('#LookupBtn').hide();
     doAjax({
         url: lookupUrl,
         data: {'word': bangla},
-        success: onAjaxSuccess
+        timeout: 15*1000,
+        success: onAjaxSuccess,
+        error: onAjaxError
     });
 }
 
