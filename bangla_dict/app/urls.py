@@ -11,8 +11,6 @@ urlpatterns = patterns('',
     (r'^lookup/(.+)/$', app.views.lookup.index),
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
-    (r'^words/phrase_lookup/$', app.views.lookup.phrase_lookup),
-    (r'^words/phrase_lookup/(.+)/$', app.views.lookup.phrase_lookup),
     (r'^words/request_new/$', app.views.words.request_new_word),
     (r'^words/random/$', app.views.words.random),
 
