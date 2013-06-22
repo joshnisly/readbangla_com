@@ -32,57 +32,10 @@ def index(request, word=None):
 def lookup_ajax(request):
     return _get_ajax_json_for_word_or_phrase(request.JSON['word'])
 
-
-def phrase_lookup(request, phrase_text=None):
-    if not phrase_text and request.method == 'POST':
-        phrase_text = request.POST['Phrase']
-
-    phrase = ''
-    results = []
-    if phrase_text:
-        phrase_words = phrase_text.split(' ')
-        for word in phrase_words:
-            word = word_helpers.simple_correct_spelling(word)
-
-            url = ''
-            pane_url = ''
-            english = ''
-            word_only = None
-
-            roots = [word] + word_helpers.get_possible_roots(word)
-            for root in roots:
-                match = helpers.get_first_or_none(models.Word, word=root)
-                if match:
-                    url = reverse(words.view_word, args=[match.word])
-                    pane_url = url
-                    english = match.definitions.all()[:1][0].english_word
-                    word_only = False
-
-            if not english:
-                for root in roots:
-                    match = helpers.get_first_or_none(models.ExternalWord, word=root)
-                    if match:
-                        url = reverse(words.view_word, args=[match.word])
-                        pane_url = helpers.get_samsad_url(match.word)
-                        english = '[word only]'
-                        word_only = True
-            
-            results.append({
-                'bangla': word,
-                'english': english,
-                'url': url,
-                'pane_url': pane_url,
-                'word_only': word_only,
-            })
-            
-    return helpers.run_template(request, 'home__phrase_lookup', {
-        'phrase': phrase_text or '',
-        'results': results
-    })
-
 ##################### Internal
 def _get_ajax_json_for_word_or_phrase(input_str):
     word = input_str.strip()
+    word = word_helpers.simple_correct_spelling(word)
     if ' ' in word:
         phrase_words = word.split(' ')
         result = {
@@ -100,7 +53,6 @@ def _get_ajax_json_for_word_or_phrase(input_str):
     
 def _get_json_for_word(word_str):
     word = word_str.strip()
-    word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
         'word': word_str,
