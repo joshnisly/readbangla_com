@@ -53,6 +53,7 @@ def _get_ajax_json_for_word_or_phrase(input_str):
     
 def _get_json_for_word(word_str):
     word = word_str.strip()
+    word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
         'word': word_str,
