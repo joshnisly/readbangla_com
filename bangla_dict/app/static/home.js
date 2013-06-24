@@ -233,7 +233,7 @@ $(document).ready(function() {
 
     History.Adapter.bind(window,'popstate',function() {
         var state = History.getState(); // Note: We are using History.getState() instead of event.state
-        if (state)
+        if (state && state.data.word)
         {
             var result = state.data;
             $('#BanglaWord').val(result.word);
