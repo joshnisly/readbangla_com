@@ -175,7 +175,7 @@ TABLE TD
     box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
-.Pane > IFRAME
+.Pane IFRAME
 {
     position: absolute;
     height: 100%;

@@ -19,25 +19,12 @@ def run_template(request, template_name, parms,
     ua = request.META['HTTP_USER_AGENT'].lower()
     is_mobile = 'mobile' in ua or 'tablet' in ua
 
-    init_links = _get_page_structure()
-    links = []
-    sub_links = []
-    for link in init_links:
-        if not is_mobile or len(link) >= 5:
-            links.append(link)
-        if top == link[0].lower():
-            sub_links = link[2]
-
     template_path = template_file_override or template_name
     template = loader.get_template(template_path + '.' + template_ext)
     parms = dict(parms)
     parms.update({
         'name': template_name,
         'request': request,
-        'top_links': links,
-        'top_link_name': top,
-        'sub_links': sub_links,
-        'sub_link_name': sub
     })
 
     template_path = template_file_override or template_name

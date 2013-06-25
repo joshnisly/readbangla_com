@@ -72,6 +72,16 @@ def enter_definition(request, word_str=None):
         'existing_defs': existing_defs
     })
 
+@login_required
+def edit_samsad_url(request, word_str):
+    word = helpers.get_first_or_none(models.Word, word=word_str)
+    if not word:
+        return HttpResponseRedirect(reverse(lookup.index, args=[word_str]))
+
+    return helpers.run_template(request, 'entry__edit_samsad_url', {
+        'word_str': word_str
+    })
+
 @helpers.json_entrypoint
 def new_word_ajax(request):
     word = request.JSON['word']
