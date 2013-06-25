@@ -33,7 +33,12 @@ function doAjax(options)
             return;
         }
         if (onSuccess)
-            onSuccess(response);
+        {
+            var data;
+            if ('data' in options)
+                data = JSON.parse(options['data'])
+            onSuccess(response, data);
+        }
     }
     
     
