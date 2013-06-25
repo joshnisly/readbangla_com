@@ -36,6 +36,16 @@ function createDefSection(word, parent)
     var wrapper = parent.appendNewChild('DIV', '', 'WordSection')
     var titleElem = wrapper.appendNewChild('DIV', '', 'WordTitle Bangla');
     titleElem.appendNewChild('A').attr('href', word.view_url).text(word.word);
+    var button = titleElem.appendNewChild('BUTTON', '', 'LinkLikeButton');
+    button.css('margin-left', '2em');
+    button.attr('xsamsadurl', word.samsad_url);
+    button.text('Samsad');
+    if (word.edit_samsad_url)
+    {
+        var editSamsadLink = titleElem.appendNewChild('A', '', 'EditSamsadLink');
+        editSamsadLink.text('(edit)')
+        editSamsadLink.attr('href', word.edit_samsad_url);
+    }
     if (word.defs)
     {
         for (var i = 0; i < word.defs.length; i++)
@@ -56,9 +66,6 @@ function createDefSection(word, parent)
         }
     }
     var bottomWrapper = wrapper.appendNewChild('DIV');
-    var button = bottomWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton');
-    button.attr('xsamsadurl', word.samsad_url);
-    button.text('Samsad');
     bottomWrapper.appendNewChild('A').attr('href', word.add_def_url).text('Add Definition');
 }
 
