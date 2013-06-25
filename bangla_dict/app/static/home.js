@@ -84,7 +84,7 @@ function createSingleWordResults(result)
             'display': 'inline-block',
             'margin-bottom': '2em'
         });
-        addDefLink.text('Add Definition for ' + result.word);
+        addDefLink.text('Add Definition for ' + result.corrected_word);
         addDefLink.attr('href', result.add_def_url);
     }
 
