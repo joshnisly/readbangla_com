@@ -34,8 +34,8 @@ def lookup_ajax(request):
 
 ##################### Internal
 def _get_ajax_json_for_word_or_phrase(input_str):
-    word = input_str.strip()
-    word = word_helpers.simple_correct_spelling(word)
+    word = word_helpers.simple_correct_spelling(input_str)
+    word = word.strip()
     if ' ' in word:
         phrase_words = word.split(' ')
         result = {
@@ -45,7 +45,8 @@ def _get_ajax_json_for_word_or_phrase(input_str):
             'words': []
         }
         for phrase_word in phrase_words:
-            result['words'].append(_get_json_for_word(phrase_word))
+            if phrase_word.strip():
+                result['words'].append(_get_json_for_word(phrase_word))
 
         return result
 

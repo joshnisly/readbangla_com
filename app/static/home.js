@@ -80,7 +80,10 @@ function createSingleWordResults(result)
 
     if (result.add_def_url)
     {
-        var addDefLink = resultsElem.appendNewChild('A');
+        var addDefLink = resultsElem.appendNewChild('A').css({
+            'display': 'inline-block',
+            'margin-bottom': '2em'
+        });
         addDefLink.text('Add Definition for ' + result.word);
         addDefLink.attr('href', result.add_def_url);
     }
@@ -158,9 +161,9 @@ function handleResults(result)
         createSingleWordResults(result);
 }
 
-function onAjaxSuccess(result)
+function onAjaxSuccess(result, origPost)
 {
-    if (result.word != $('#BanglaWord').val() && result.word != avro.parse($('#BanglaWord').val()))
+    if (origPost.word != $('#BanglaWord').val())
         return;
 
     handleResults(result);
