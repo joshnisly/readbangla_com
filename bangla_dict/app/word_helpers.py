@@ -10,7 +10,7 @@ def simple_correct_spelling(word):
     word = word.replace(u'\u0964', '') # | to end sentences
 
     word = NO_PUNCTUATION_RE.sub(' ', word)
-    return word
+    return word.strip(' ')
 
 
 def get_possible_roots(word):
