@@ -71,7 +71,7 @@ def _get_json_for_word(word_str):
                 'word': match.word,
                 'defs': [db_helpers.model_to_dict(x) for x in defs],
                 'view_url': reverse(index, args=[match.word]),
-                'samsad_url': helpers.get_samsad_url(match.word),
+                'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
                 'add_def_url': reverse(entry.enter_definition, args=[match.word]),
             })

@@ -44,6 +44,10 @@ class Word(models.Model):
     added_by = models.ForeignKey(UserProfile)
     added_on = models.DateTimeField(auto_now_add=True)
 
+    samsad_keyword = models.CharField(max_length=100)
+    samsad_entries_only = models.BooleanField()
+    samsad_exact_match = models.BooleanField()
+
     def __unicode__(self):
         return self.word
 admin.site.register(Word)

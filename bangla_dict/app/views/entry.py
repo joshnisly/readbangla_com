@@ -78,8 +78,20 @@ def edit_samsad_url(request, word_str):
     if not word:
         return HttpResponseRedirect(reverse(lookup.index, args=[word_str]))
 
+    if request.method == 'POST' and request.POST.get('Action') == 'Submit':
+        word.samsad_keyword = request.POST['Keyword']
+        word.samsad_entries_only = 'EntriesOnly' in request.POST
+        word.samsad_exact_match = 'ExactMatch' in request.POST
+        word.save()
+
+        return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
+
+    if request.method == 'POST' and request.POST.get('Action') == 'Cancel':
+        return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
+        
     return helpers.run_template(request, 'entry__edit_samsad_url', {
-        'word_str': word_str
+        'word': word,
+        'keyword': word.samsad_keyword or word.word
     })
 
 @helpers.json_entrypoint
@@ -113,4 +125,5 @@ class _DefinitionForm(forms.Form):
     notes = forms.CharField(required=False, widget=forms.Textarea(attrs={
                       'placeholder': '(Optional)'
                   }))
+
 

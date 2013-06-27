@@ -63,6 +63,10 @@ TABLE TD
     font-family: Lohit Bengali, Verdana, Arial, sans-serif;
     font-size: 14pt;
 }
+INPUT.Bangla
+{
+    padding: 0.1em 0.25em 0 0.25em;
+}
 
 .ModelForm TH
 {
@@ -174,6 +178,10 @@ TABLE TD
     margin: 0;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
+}
+.RightPane
+{
+    left: 50%;
 }
 .Pane IFRAME
 {

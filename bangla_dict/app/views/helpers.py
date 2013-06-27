@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.template import Context, RequestContext, loader
 import json
+import traceback
 import urllib
 
 from app import email_send
@@ -55,7 +56,10 @@ def json_entrypoint(func):
         try:
             response = func(request, *a, **kw)
         except Exception, e:
-            response = {'error': str(e)}
+            response = {
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
         else:
             if isinstance(response, HttpResponse):
                 return response
@@ -70,6 +74,18 @@ def get_first_or_none(model, **kwargs):
         return objs[0]
     return None
 
+def get_samsad_url_for_word_obj(word_obj):
+    keyword = word_obj.samsad_keyword or word_obj.word
+    url = 'http://dsalsrv02.uchicago.edu/cgi-bin/romadict.pl?table=biswas-bengali&query='
+    url += urllib.quote_plus(keyword.encode('utf-8'))
+    if word_obj.samsad_entries_only:
+        url += '&searchhws=yes'
+    if word_obj.samsad_exact_match:
+        url += '&matchtype=exact'
+
+    return url
+
+            
 def get_samsad_url(word):
     return 'http://dsalsrv02.uchicago.edu/cgi-bin/romadict.pl?query=%s&searchhws=yes&table=biswas-bengali' % \
             urllib.quote_plus(word.encode('utf-8'))
