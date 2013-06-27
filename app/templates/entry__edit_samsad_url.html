@@ -2,5 +2,40 @@
 {% block title %}Edit Samsad Link{% endblock %}
 
 {% block content %}
-<p>Hey! This is where you'd be able to edit the Samsad link if Josh wasn't so lazy!</p>
+<div class="Pane" style="padding: 1em">
+<h2>Edit Samsad link for {{word_str}}</h2>
+<p>Ideally, each entry is linked to Samsad in a way that only shows the entry for that word, and no other word. Unfortunately, this can be a bit tricky at times.</p>
+<form action="{% url app.views.entry.edit_samsad_url word.word %}" method="POST">{% csrf_token %}
+<div>
+    <table><tr>
+    <td>
+        <label>Word: <input type="text" class="Bangla" name="Keyword" id="Keyword" value="{{keyword}}"/></label>
+    </td>
+    <td>
+        <img src="/static/throbber_large.gif" id="Throbber" style="display: none"/>
+    </td>
+    </tr></table>
+</div>
+<div style="display: inline-block">
+    <label>
+        <input type="checkbox" name="EntriesOnly" id="EntriesOnly"
+            {% if word.samsad_entries_only %}checked="checked" {% endif %}/> Search entries only
+    </label>
+    <label>
+        <input type="checkbox" name="ExactMatch" id="ExactMatch"
+            {% if word.samsad_exact_match %}checked="checked" {% endif %}/> Exact match
+        </label>
+    <br/>
+    <div style="margin-top: 1em;">
+        <button type="submit" name="Action" value="Cancel" class="invBtn">Cancel</button>
+        <button type="submit" name="Action" value="Submit" class="invBtn invBtnPrimary" style="float: right">Save link</button>
+    </div>
+</div>
+
+</form>
+</div>
+<div class="Pane RightPane">
+    <iframe id="SamsadPane" ></iframe>
+</div>
+<script type="text/javascript" src="/static/edit_samsad_url.js"></script>
 {% endblock %}
