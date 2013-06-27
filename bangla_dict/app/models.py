@@ -35,8 +35,8 @@ class ProfileInline(admin.StackedInline):
 class ProfileUserAdmin(UserAdmin):
     inlines = [ProfileInline]
 
-admin.site.unregister(auth_models.User)
-admin.site.register(auth_models.User, ProfileUserAdmin)
+#admin.site.unregister(auth_models.User)
+#admin.site.register(auth_models.User, ProfileUserAdmin)
 
 
 class Word(models.Model):
