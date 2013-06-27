@@ -153,7 +153,7 @@ class DatabaseUpgrader(object):
                 if old_col['type'] != self._get_sql_col_type(new_col['type']) and \
                     not (old_col['type'] == 'blob' and new_col['type'] == 'file'):
 
-                    print old_col['type'], new_col['type']
+                    print old_col['type'], new_col['type'], self._get_sql_col_type(new_col['type'])
                     error = '%s.%s: changing column types is not supported.'
                     raise UpgradeError, error % (new_table, new_col['name'])
 
@@ -211,10 +211,7 @@ class DatabaseUpgrader(object):
                 'fields': []
             }
             table_name = '%s_%s' % (self._app_name, model.__name__.lower())
-            print table_name
             for field in model._meta.fields:
-                print field.name
-                print field.db_type()
                 field_type = field.db_type()
                 auto_increment = False
                 if field_type.endswith('AUTO_INCREMENT'):
@@ -238,7 +235,6 @@ class DatabaseUpgrader(object):
 
             db_def[table_name] = table_def
 
-        print db_def
         return db_def
 
     def _build_def_from_sql(self):
@@ -335,6 +331,8 @@ class DatabaseUpgrader(object):
     def _get_sql_col_type(self, def_type):
         if def_type in _RELATIONSHIP_TYPES:
             return 'int'
+        elif def_type == 'bool':
+            return 'tinyint'
         elif def_type == 'boolean':
             return 'tinyint'
         elif def_type == 'file':
@@ -509,7 +507,15 @@ if __name__ == '__main__':
     import django
     import django.db
 
+    import json
+
     upgrader = DatabaseUpgrader('bangla_dict', 'app')
 
-    print upgrader.get_changes()
+    if upgrader.get_changes():
+        print json.dumps(upgrader.get_changes(), indent=3)
+        print 'Do you want to make these changes [Y/N]?',
+        if raw_input().lower() == 'y':
+            upgrader.make_changes()
+    else:
+        print 'No changes detected.'
 
