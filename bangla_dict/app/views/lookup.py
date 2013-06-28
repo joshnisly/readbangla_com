@@ -69,7 +69,7 @@ def _get_json_for_word(word_str):
             defs = match.definitions.all()
             result['dict_matches'].append({
                 'word': match.word,
-                'defs': [db_helpers.model_to_dict(x) for x in defs],
+                'defs': [db_helpers.def_obj_to_dict(x) for x in defs],
                 'view_url': reverse(index, args=[match.word]),
                 'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
