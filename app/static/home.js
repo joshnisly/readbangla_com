@@ -51,18 +51,24 @@ function createDefSection(word, parent)
         for (var i = 0; i < word.defs.length; i++)
         {
             var def = word.defs[i];
+            var defWrapper = wrapper.appendNewChild('DIV', '', 'WordDefWrapper');
             var defLine = '(' + getPartOfSpeechDisplay(def.part_of_speech) + ') ' + def.english_word;
-            wrapper.appendNewChild('DIV').appendNewChild('SPAN').text(defLine);
+            defWrapper.appendNewChild('DIV').appendNewChild('SPAN').text(defLine);
             if (def.definition)
             {
                 var defLine = 'Definition: ' + def.definition;
-                wrapper.appendNewChild('DIV', '', 'DefSection').text(defLine);
+                defWrapper.appendNewChild('DIV', '', 'DefSection').text(defLine);
             }
             if (def.notes)
             {
                 var notesLine = 'Notes: ' + def.notes;
-                wrapper.appendNewChild('DIV', '', 'DefSection').text(notesLine);
+                defWrapper.appendNewChild('DIV', '', 'DefSection').text(notesLine);
             }
+
+            var addedWrapper = defWrapper.appendNewChild('DIV', '', 'WordAddedWrapper');
+            var addedLine = 'Added by ' + def['added_by'];
+            addedLine += ' on ' + def['added_on_date'] + ' ' + def['added_on_time'];
+            addedWrapper.text(addedLine)
         }
     }
     var bottomWrapper = wrapper.appendNewChild('DIV');

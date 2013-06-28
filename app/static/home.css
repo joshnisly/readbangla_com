@@ -38,6 +38,16 @@
     white-space: pre;
 }
 
+.WordDefWrapper
+{
+    margin-bottom: 1em;
+}
+
+.WordAddedWrapper
+{
+    font-style: italic;
+}
+
 .WordSection
 {
     margin-bottom: 1.5em;
