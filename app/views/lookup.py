@@ -67,9 +67,13 @@ def _get_json_for_word(word_str):
         match = helpers.get_first_or_none(models.Word, word=root)
         if match:
             defs = match.definitions.all()
+            def_dicts = [db_helpers.def_obj_to_dict(x) for x in defs]
+            for def_dict in def_dicts:
+                def_dict['edit_def_url'] = reverse(entry.edit_definition,
+                                                   args=[def_dict['id']])
             result['dict_matches'].append({
                 'word': match.word,
-                'defs': [db_helpers.def_obj_to_dict(x) for x in defs],
+                'defs': def_dicts,
                 'view_url': reverse(index, args=[match.word]),
                 'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
