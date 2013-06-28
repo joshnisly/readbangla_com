@@ -43,34 +43,16 @@ def enter_new_word(request):
 
 @login_required
 def enter_definition(request, word_str=None):
-    definition_form = _DefinitionForm()
-    if request.method == 'POST':
-        definition_form = _DefinitionForm(request.POST)
-        if definition_form.is_valid():
-            word = helpers.get_first_or_none(models.Word, word=word_str)
-            if not word:
-                word = models.Word.objects.create(word=word_str,
-                                                  added_by=request.user.get_profile())
-            def_data = definition_form.cleaned_data
-            definition = models.Definition.objects.create(word=word,
-                                  part_of_speech=def_data['part_of_speech'],
-                                  english_word=def_data['english_word'],
-                                  definition=def_data['definition'],
-                                  notes=def_data['notes'],
-                                  added_by=request.user.get_profile())
+    return _run_edit_def_entrypoint(request, word_str)
 
-            return HttpResponseRedirect(reverse(lookup.index,
-                                                args=[word.word]))
+@login_required
+def edit_definition(request, def_id):
+    def_obj = helpers.get_first_or_none(models.Definition, id=def_id)
+    if not def_obj:
+        return HttpResponseRedirect(reverse(lookup.index))
 
-    existing_defs = []
-    word = helpers.get_first_or_none(models.Word, word=word_str)
-    if word:
-        existing_defs = list(word.definitions.all())
-    return helpers.run_template(request, 'entry__enter_new_word', {
-        'definition_form': definition_form,
-        'word_str': word_str,
-        'existing_defs': existing_defs
-    })
+    word_str = def_obj.word.word
+    return _run_edit_def_entrypoint(request, word_str, def_obj)
 
 @login_required
 def edit_samsad_url(request, word_str):
@@ -126,4 +108,52 @@ class _DefinitionForm(forms.Form):
                       'placeholder': '(Optional)'
                   }))
 
+def _run_edit_def_entrypoint(request, word_str, def_obj=None):
+    if def_obj:
+        definition_form = _DefinitionForm(initial={
+            'part_of_speech': def_obj.part_of_speech,
+            'english_word': def_obj.english_word,
+            'definition': def_obj.definition,
+            'notes': def_obj.notes,
+        })
+    else:
+        definition_form = _DefinitionForm()
+    if request.method == 'POST':
+        definition_form = _DefinitionForm(request.POST)
+        if definition_form.is_valid():
+            word = helpers.get_first_or_none(models.Word, word=word_str)
+            if not word:
+                word = models.Word.objects.create(word=word_str,
+                                                  added_by=request.user.get_profile())
+            def_data = definition_form.cleaned_data
+            def_args = {
+                'part_of_speech': def_data['part_of_speech'],
+                'english_word': def_data['english_word'],
+                'definition': def_data['definition'],
+                'notes': def_data['notes'],
+                'added_by': request.user.get_profile()
+            }
+            if def_obj:
+                for key, value in def_args.items():
+                    def_obj.__setattr__(key, value)
+                def_obj.save()
+            else:
+                models.Definition.objects.create(word=word,
+                                          added_by=request.user.get_profile(),
+                                          **def_args)
+
+            return HttpResponseRedirect(reverse(lookup.index,
+                                                args=[word.word]))
+
+    existing_defs = []
+    word = helpers.get_first_or_none(models.Word, word=word_str)
+    if word:
+        existing_defs = list(word.definitions.all())
+        if def_obj:
+            existing_defs = filter(lambda x: x.id != def_obj.id, existing_defs)
+    return helpers.run_template(request, 'entry__enter_new_word', {
+        'definition_form': definition_form,
+        'word_str': word_str,
+        'existing_defs': existing_defs
+    })
 

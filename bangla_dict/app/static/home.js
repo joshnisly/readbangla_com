@@ -52,8 +52,10 @@ function createDefSection(word, parent)
         {
             var def = word.defs[i];
             var defWrapper = wrapper.appendNewChild('DIV', '', 'WordDefWrapper');
-            var defLine = '(' + getPartOfSpeechDisplay(def.part_of_speech) + ') ' + def.english_word;
-            defWrapper.appendNewChild('DIV').appendNewChild('SPAN').text(defLine);
+            var defLine = '(' + getPartOfSpeechDisplay(def.part_of_speech) + ') ' + def.english_word + ' ';
+            var defLineWrapper = defWrapper.appendNewChild('DIV');
+            defLineWrapper.appendNewChild('SPAN').text(defLine);
+            defLineWrapper.appendNewChild('A').attr('href', def.edit_def_url).text('(edit)');
             if (def.definition)
             {
                 var defLine = 'Definition: ' + def.definition;
