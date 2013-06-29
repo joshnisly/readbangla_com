@@ -10,8 +10,10 @@
             <td><button type="button" id="LookupBtn" class="LookupBtn invBtn invBtnPrimary">Lookup</button></td>
             <td><img src="/static/throbber_large.gif" id="Throbber" style="display: none"/></td>
         </tr></table>
-        <label class="RadioLabel Checked"><input type="radio" name="Language" value="Bangla" checked="checked"/> Bangla</label>
-        <label class="RadioLabel"><input type="radio" name="Language" value="English"/> English</label>
+        <label class="RadioLabel {% if not is_english %}Checked{% endif %}"><input type="radio" name="Language"
+            value="Bangla" {% if not is_english %}checked="checked" {% endif %}/> Bangla</label>
+        <label class="RadioLabel {% if is_english %}Checked{% endif %}"><input type="radio" name="Language" id="EnglishRadio"
+            value="English" {% if is_english %}checked="checked" {% endif %}/> English</label>
     </div>
     <p id="Results" xPartsOfSpeech="{{parts_of_speech}}" xWordData="{{word_data}}"></p>
 

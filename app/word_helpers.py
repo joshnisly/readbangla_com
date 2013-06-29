@@ -29,3 +29,12 @@ def get_possible_roots(word):
             roots.append(word)
 
     return roots
+
+def is_ascii(text):
+    try:
+        text.decode('ascii')
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return False
+    else:
+        return True
+

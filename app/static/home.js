@@ -84,7 +84,7 @@ function createSingleWordResults(result)
     var hasResults = result.dict_matches.length || result.word_matches.length;
 
     if (!hasResults)
-        resultsElem.appendNewChild('H3').text('No matches for ' + result.word + ' found.');
+        resultsElem.appendNewChild('H3').text('No matches for ' + result.corrected_word + ' found.');
 
     if (result.add_def_url)
     {
@@ -192,7 +192,9 @@ function doAjaxLookup()
     if (!bangla)
         return;
 
-    if (isAscii(bangla))
+    var isEnglish = $('#EnglishRadio')[0].checked;
+
+    if (isAscii(bangla) && !isEnglish)
         bangla = avro.parse(bangla);
 
     $('#BanglaWord').val(bangla);
