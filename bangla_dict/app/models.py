@@ -66,6 +66,7 @@ class Definition(models.Model):
     def __unicode__(self):
         return '%s (def added by %s on %s)' % (self.word.word, self.added_by,
                                                self.added_on)
+
 admin.site.register(Definition)
 
 class FlaggedDefinition(models.Model):

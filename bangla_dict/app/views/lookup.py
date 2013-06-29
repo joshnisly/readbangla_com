@@ -2,6 +2,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import decorators, authenticate, login, logout
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django import forms
 from django.http import HttpResponseRedirect
 import json
@@ -18,13 +19,18 @@ from app import word_helpers
 def index(request, word=None):
     num_words = models.Word.objects.all().count()
     json_str = ''
+    is_english = False
     if word:
-        json_str = json.dumps(_get_ajax_json_for_word_or_phrase(word))
+        json_obj = _get_ajax_json_for_word_or_phrase(word)
+        json_str = json.dumps(json_obj)
+        is_english = json_obj['is_english']
+
     return helpers.run_template(request, 'home', {
         'num_words': num_words,
         'word': word,
         'parts_of_speech': json.dumps(models.PART_OF_SPEECH_CHOICES),
-        'word_data': json_str
+        'word_data': json_str,
+        'is_english': is_english
     })
 
 @csrf_exempt
@@ -51,9 +57,12 @@ def _get_ajax_json_for_word_or_phrase(input_str):
         return result
 
     return _get_json_for_word(input_str)
-    
+
 def _get_json_for_word(word_str):
     word = word_str.strip()
+    if word and word_helpers.is_ascii(word):
+        return _get_json_for_english_word(word_str)
+
     word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
@@ -62,18 +71,14 @@ def _get_json_for_word(word_str):
         'corrected_word': word,
         'dict_matches': [],
         'word_matches': [],
+        'is_english': False
     }
     for root in [word] + root_words:
         match = helpers.get_first_or_none(models.Word, word=root)
         if match:
-            defs = match.definitions.all()
-            def_dicts = [db_helpers.def_obj_to_dict(x) for x in defs]
-            for def_dict in def_dicts:
-                def_dict['edit_def_url'] = reverse(entry.edit_definition,
-                                                   args=[def_dict['id']])
             result['dict_matches'].append({
                 'word': match.word,
-                'defs': def_dicts,
+                'defs': [_get_def_dict(x) for x in match.definitions.all()],
                 'view_url': reverse(index, args=[match.word]),
                 'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
@@ -94,4 +99,39 @@ def _get_json_for_word(word_str):
         result['add_def_url'] = reverse(entry.enter_definition, args=[word])
 
     return result
+
+def _get_json_for_english_word(raw_word):
+    word = raw_word.strip()
+    dict_matches = models.Definition.objects.filter(Q(english_word__icontains=word) |
+                                                    Q(definition__icontains=word) |
+                                                    Q(notes__icontains=word)).select_related('word')
+    matches = {}
+    for match in dict_matches:
+        matches.setdefault(match.word, []).append(match)
+        
+    result = {
+        'word': raw_word,
+        'word_url': reverse(index, args=[word]),
+        'corrected_word': word,
+        'dict_matches': [],
+        'word_matches': [],
+        'is_english': True
+    }
+
+    for word in matches:
+        result['dict_matches'].append({
+            'word': word.word,
+            'defs': [_get_def_dict(x) for x in matches[word]],
+            'view_url': reverse(index, args=[word.word]),
+            'samsad_url': helpers.get_samsad_url_for_word_obj(word),
+            'edit_samsad_url': reverse(entry.edit_samsad_url, args=[word.word]),
+            'add_def_url': reverse(entry.enter_definition, args=[word.word]),
+        })
+    return result
+
+def _get_def_dict(def_obj):
+    def_dict = db_helpers.def_obj_to_dict(def_obj)
+    def_dict['edit_def_url'] = reverse(entry.edit_definition,
+                                       args=[def_dict['id']])
+    return def_dict
 
