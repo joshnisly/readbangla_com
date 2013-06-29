@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="Pane" style="padding: 1em">
-<h2>Edit Samsad link for {{word_str}}</h2>
+<h2>Edit Samsad link for {{word.word}}</h2>
 <p>Ideally, each entry is linked to Samsad in a way that only shows the entry for that word, and no other word. Unfortunately, this can be a bit tricky at times.</p>
 <form action="{% url app.views.entry.edit_samsad_url word.word %}" method="POST">{% csrf_token %}
 <div>
@@ -31,8 +31,12 @@
         <button type="submit" name="Action" value="Submit" class="invBtn invBtnPrimary" style="float: right">Save link</button>
     </div>
 </div>
-
 </form>
+<h3 style="margin-top: 2em">Tips</h3>
+<ul>
+    <li>Ellis should come up with some tips here, based on experience.</li>
+    <li>If searching for the Bangla word returns too many results, try searching for a unique word or phrase in the definition.</li>
+</ul>
 </div>
 <div class="Pane RightPane">
     <iframe id="SamsadPane" ></iframe>
