@@ -48,7 +48,8 @@ def _get_ajax_json_for_word_or_phrase(input_str):
             'phrase': True,
             'word': input_str,
             'word_url': reverse(index, args=[word]),
-            'words': []
+            'words': [],
+            'is_english': False
         }
         for phrase_word in phrase_words:
             if phrase_word.strip():
