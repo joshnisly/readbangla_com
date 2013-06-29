@@ -6,12 +6,13 @@ import django.contrib.auth.models as auth_models
 from django.db.models.signals import post_save
 
 PART_OF_SPEECH_CHOICES = (
+    ('N', 'Noun'),
+    ('V', 'Verb'),
     ('A', 'Adjective'),
     ('D', 'Adverb'),
-    ('N', 'Noun'),
     ('P', 'Pronoun'),
+    ('C', 'Conjunction'),
     ('R', 'Preposition'),
-    ('V', 'Verb'),
     ('O', 'Proper noun'),
 )
 
