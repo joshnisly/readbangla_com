@@ -131,7 +131,6 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
                 'english_word': def_data['english_word'],
                 'definition': def_data['definition'],
                 'notes': def_data['notes'],
-                'added_by': request.user.get_profile()
             }
             if def_obj:
                 for key, value in def_args.items():
