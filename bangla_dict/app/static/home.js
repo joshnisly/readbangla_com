@@ -1,5 +1,6 @@
 (function() {
-var lookupUrl = '/words/lookup/ajax/';
+var lookupAjaxUrl = '/words/lookup/ajax/';
+var lookupLinkUrl = '/lookup/';
 var avro = OmicronLab.Avro.Phonetic;
 var lastResult = null;
 
@@ -31,6 +32,11 @@ function loadSamsadPane(url)
         $('#SamsadPane')[0].contentWindow.location.replace(url);
 };
 
+function buildLookupUrl(word)
+{
+    return lookupLinkUrl + word + '/';
+}
+
 function createDefSection(word, parent)
 {
     var wrapper = parent.appendNewChild('DIV', '', 'WordSection')
@@ -59,12 +65,12 @@ function createDefSection(word, parent)
             if (def.definition)
             {
                 var defLine = 'Definition: ' + def.definition;
-                defWrapper.appendNewChild('DIV', '', 'DefSection').text(defLine);
+                appendTextWithBanglaLinks(defWrapper.appendNewChild('DIV', '', 'DefSection'), defLine, buildLookupUrl);
             }
             if (def.notes)
             {
                 var notesLine = 'Notes: ' + def.notes;
-                defWrapper.appendNewChild('DIV', '', 'DefSection').text(notesLine);
+                appendTextWithBanglaLinks(defWrapper.appendNewChild('DIV', '', 'DefSection'), notesLine, buildLookupUrl);
             }
 
             var addedWrapper = defWrapper.appendNewChild('DIV', '', 'WordAddedWrapper');
@@ -206,7 +212,7 @@ function doAjaxLookup()
     $('#Throbber').show();
     $('#LookupBtn').hide();
     doAjax({
-        url: lookupUrl,
+        url: lookupAjaxUrl,
         data: {'word': bangla},
         timeout: 15*1000,
         success: onAjaxSuccess,
