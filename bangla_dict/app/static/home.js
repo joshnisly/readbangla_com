@@ -161,8 +161,13 @@ function handleResults(result)
 {
     lastResult = result.word;
 
-    if (window.History && result.word_url && result.word_url != window.location.pathname)
+    if (window.History &&
+        result.word_url &&
+        result.word_url != window.location.pathname &&
+        result.word_url.length < 100)
+    {
         window.History.pushState(result, 'Lookup results', result.word_url);
+    }
 
     var resultsElem = $('#Results');
     $('#Throbber').hide();
