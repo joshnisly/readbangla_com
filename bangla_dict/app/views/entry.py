@@ -92,7 +92,19 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
         })
     else:
         definition_form = _DefinitionForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and request.POST.get('Action') == 'Delete':
+        db_helpers.add_audit_trail_entry(def_obj, None, request.user.get_profile())
+        def_obj.delete()
+
+        if not def_obj.word.definitions.all().count():
+            db_helpers.add_audit_trail_entry(def_obj.word, None, request.user.get_profile())
+            def_obj.word.delete()
+            return HttpResponseRedirect(reverse(lookup.index))
+        else:
+            return HttpResponseRedirect(reverse(lookup.index,
+                                                args=[def_obj.word.word]))
+
+    if request.method == 'POST' and request.POST.get('Action') == 'Edit':
         definition_form = _DefinitionForm(request.POST)
         if definition_form.is_valid():
             word = helpers.get_first_or_none(models.Word, word=word_str)
@@ -131,6 +143,7 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
     return helpers.run_template(request, 'entry__enter_new_word', {
         'definition_form': definition_form,
         'word_str': word_str,
-        'existing_defs': existing_defs
+        'existing_defs': existing_defs,
+        'is_existing_def': def_obj is not None
     })
 
