@@ -2,7 +2,6 @@ from django.conf.urls.defaults import patterns, include, url
 
 import app.views.auth
 import app.views.entry
-import app.views.help
 import app.views.lookup
 import app.views.words
 
