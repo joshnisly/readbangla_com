@@ -93,7 +93,7 @@ class DatabaseUpgrader(object):
         for old_table in db_def:
             new_table = upgrade_hints.get_new_table_name(old_table)
             
-            if new_table is None:
+            if new_table is None or not new_table in new_def:
                 # Check table deletes
                 changes.append({
                     'type': 'delete_table',
@@ -107,10 +107,6 @@ class DatabaseUpgrader(object):
                     'old_name': old_table,
                     'new_name': new_table
                 })
-            elif not new_table in new_def:
-                error = 'Table %s no longer appears, ' % new_table + \
-                        'but is not marked for deletion.'
-                raise UpgradeError, error
 
             for old_col in db_def[old_table]['fields']:
                 old_col_name = old_col['name']
