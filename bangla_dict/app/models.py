@@ -70,20 +70,6 @@ class Definition(models.Model):
 
 admin.site.register(Definition)
 
-class FlaggedDefinition(models.Model):
-    definition = models.ForeignKey(Definition)
-    reason = models.TextField()
-
-    flagged_by = models.ForeignKey(UserProfile)
-    flagged_on = models.DateTimeField(auto_now_add=True)
-
-    def __unicode__(self):
-        return '%s (flagged by %s on %s)' % (self.definition.word.word, self.flagged_by,
-                                             self.flagged_on)
-admin.site.register(FlaggedDefinition)
-
-# This table is for word lists that we don't have permission to use for 
-# definitions, but can just as a simple word list.
 class ExternalWord(models.Model):
     word = models.CharField(max_length=50, unique=True)
 
@@ -91,6 +77,41 @@ class ExternalWord(models.Model):
         return self.word
 
 admin.site.register(ExternalWord)
+
+AUDIT_TRAIL_ACTIONS = (
+    ('A', 'Add'),
+    ('D', 'Delete'),
+    ('M', 'Modify')
+)
+
+TABLE_IDS = (
+    ('W', 'Word'),
+    ('D', 'Definition'),
+)
+
+class AuditTrailEntry(models.Model):
+    user = models.ForeignKey(UserProfile)
+    action = models.CharField(max_length=1, choices=AUDIT_TRAIL_ACTIONS)
+    object_name = models.CharField(max_length=2, choices=TABLE_IDS)
+    object_id = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+    user_notes = models.TextField(null=True)
+
+    old_value_json = models.TextField(null=True)
+    new_value_json = models.TextField(null=True)
+
+    def __unicode__(self):
+        return '%s of %s by %s on %s' % (self.get_action_display(),
+                                         self.get_object_name_display(),
+                                         self.user,
+                                         self.date)
+
+admin.site.register(AuditTrailEntry)
+
+
+
+###############################################################################
+## Helpers
 
 def get_automated_user(desc):
     username = '%s_automated' % desc

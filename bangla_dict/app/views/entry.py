@@ -8,6 +8,7 @@ import helpers
 import lookup
 import words
 
+from app import db_helpers
 from app import models
 from app import word_helpers
 
@@ -123,8 +124,8 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
         if definition_form.is_valid():
             word = helpers.get_first_or_none(models.Word, word=word_str)
             if not word:
-                word = models.Word.objects.create(word=word_str,
-                                                  added_by=request.user.get_profile())
+                word = models.Word.objects.create(word=word_str, added_by=request.user.get_profile())
+                db_helpers.add_audit_trail_entry(None, word, request.user.get_profile())
             def_data = definition_form.cleaned_data
             def_args = {
                 'part_of_speech': def_data['part_of_speech'],
@@ -135,11 +136,15 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
             if def_obj:
                 for key, value in def_args.items():
                     def_obj.__setattr__(key, value)
+
+                old_def = models.Definition.objects.get(pk=def_obj.id)
+                db_helpers.add_audit_trail_entry(old_def, def_obj, request.user.get_profile())
                 def_obj.save()
             else:
-                models.Definition.objects.create(word=word,
-                                          added_by=request.user.get_profile(),
-                                          **def_args)
+                new_def = models.Definition.objects.create(word=word,
+                                                           added_by=request.user.get_profile(),
+                                                           **def_args)
+                db_helpers.add_audit_trail_entry(None, new_def, request.user.get_profile())
 
             return HttpResponseRedirect(reverse(lookup.index,
                                                 args=[word.word]))
