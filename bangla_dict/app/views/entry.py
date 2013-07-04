@@ -65,6 +65,8 @@ def edit_samsad_url(request, word_str):
         word.samsad_keyword = request.POST['Keyword']
         word.samsad_entries_only = 'EntriesOnly' in request.POST
         word.samsad_exact_match = 'ExactMatch' in request.POST
+        old_word = models.Word.objects.get(pk=word.id)
+        db_helpers.add_audit_trail_entry(old_word, word, request.user.get_profile())
         word.save()
 
         return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
