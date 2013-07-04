@@ -15,7 +15,6 @@ urlpatterns = patterns('',
     (r'^words/random/$', app.views.words.random),
 
     # Entry
-    (r'^entry/new_word/$', app.views.entry.enter_new_word),
     (r'^entry/new_def/(.+)/$', app.views.entry.enter_definition), # This url is referenced in JS.
     (r'^entry/edit_def/(\d+)/$', app.views.entry.edit_definition),
     (r'^entry/new_word_ajax/$', app.views.entry.new_word_ajax),
