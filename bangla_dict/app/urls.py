@@ -22,9 +22,6 @@ urlpatterns = patterns('',
     # Called by ajax
     (r'^words/lookup/ajax/$', app.views.lookup.lookup_ajax),
 
-    (r'^help/$', app.views.help.index),
-    (r'^help/(.*)/$', app.views.help.index),
-
     (r'^login/$', app.views.auth.auth_login),
     (r'^login/gmail/$', app.views.auth.gmail_openid_start),
     (r'^login/gmail/return/$', app.views.auth.gmail_openid_return),
