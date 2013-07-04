@@ -90,15 +90,3 @@ def get_samsad_url(word):
     return 'http://dsalsrv02.uchicago.edu/cgi-bin/romadict.pl?query=%s&searchhws=yes&table=biswas-bengali' % \
             urllib.quote_plus(word.encode('utf-8'))
 
-############################### Internals
-def _get_page_structure():
-    return (
-        ('Home', '/', []),
-        #('Scheduling', reverse('app.views.scheduling.month_view'), [], 'Scheduling (Horiaro)', True),
-        ('Entry', reverse('app.views.entry.enter_new_word'), [
-            ('Enter New Word', reverse('app.views.entry.enter_new_word')),
-            ('Enter New Definition', reverse('app.views.entry.enter_new_word')),
-        ]),
-        ('Help', reverse('app.views.help.index'), []),
-    )
-
