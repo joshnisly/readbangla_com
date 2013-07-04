@@ -11,7 +11,6 @@ urlpatterns = patterns('',
     (r'^lookup/(.+)/$', app.views.lookup.index),
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
-    (r'^words/request_new/$', app.views.words.request_new_word),
     (r'^words/random/$', app.views.words.random),
 
     # Entry
@@ -20,14 +19,8 @@ urlpatterns = patterns('',
     (r'^entry/new_word_ajax/$', app.views.entry.new_word_ajax),
     (r'^entry/edit_samsad/(.+)/$', app.views.entry.edit_samsad_url),
 
-    # Called only by form POSTs
-    (r'^words/edit_def/(\d+)/$', app.views.words.edit_def),
-    (r'^words/add_def/(\d+)/$', app.views.words.add_def),
-
     # Called by ajax
     (r'^words/lookup/ajax/$', app.views.lookup.lookup_ajax),
-    (r'^words/flag_def/$', app.views.words.flag_def),
-    (r'^words/delete_def/$', app.views.words.delete_def),
 
     (r'^help/$', app.views.help.index),
     (r'^help/(.*)/$', app.views.help.index),
