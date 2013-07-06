@@ -7,6 +7,7 @@ import traceback
 import urllib
 
 from app import email_send
+from app import db_helpers
 
 def run_template(request, template_name, parms,
                 template_file_override=None,
@@ -69,10 +70,7 @@ def json_entrypoint(func):
     return wrap
 
 def get_first_or_none(model, **kwargs):
-    objs = list(model.objects.filter(**kwargs)[:1])
-    if objs:
-        return objs[0]
-    return None
+    return db_helpers.get_first_or_none(model, **kwargs)
 
 def get_samsad_url_for_word_obj(word_obj):
     keyword = word_obj.samsad_keyword or word_obj.word
