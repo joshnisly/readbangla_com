@@ -1,11 +1,13 @@
 
 import datetime
+from django.core.urlresolvers import reverse
 from django.contrib.auth import decorators, authenticate, login, logout
 from django import forms
 from django.http import HttpResponseRedirect
 import json
 
 import helpers
+import lookup
 
 from app import models
 
@@ -23,7 +25,7 @@ def recent_changes(request):
             try:
                 word_str = models.Word.objects.get(pk=single_obj['word'])
             except Exception:
-                word_str = '<deleted word>'
+                word_str = None
         elif entry.object_name == 'W' and entry.action == 'M' and \
                 (old_obj['samsad_keyword'] != new_obj['samsad_keyword'] or \
                 old_obj['samsad_entries_only'] != new_obj['samsad_entries_only'] or \
@@ -38,9 +40,11 @@ def recent_changes(request):
         if entry.date:
             entry_dict['date'] = entry.date.strftime('%m/%d/%Y %I:%M:%S %P')
             entry_dict['time_since'] = _format_timedelta(datetime.datetime.now() - entry.date)
-        #entry_dict['url'] = entry.get_url()
+        if word_str:
+            entry_dict['url'] = reverse(lookup.index, args=[word_str])
         entry_dict['action'] = entry.action
-        entry_dict['action_desc'] = u'%s %s %s' % (_action_desc(entry.action), changes_desc, word_str)
+        entry_dict['action_desc'] = u'%s %s' % (_action_desc(entry.action), changes_desc)
+        entry_dict['word'] = word_str or '<deleted word>'
         entry_dict['old'] = old_obj
         entry_dict['new'] = new_obj
 
