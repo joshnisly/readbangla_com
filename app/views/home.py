@@ -58,16 +58,24 @@ def _format_timedelta(td):
     years = int(td.days / 365)
     hours = int(td.seconds / 60 / 60)
     minutes = int((td.seconds % (60 * 60)) / 60)
-    if years > 0:
-        return '%i years, %i days' % (years, td.days)
-    elif td.days > 0:
-        return '%i days, %i hours' % (td.days, hours)
-    elif td.seconds > 60 * 60:
-        return '%i hours, %i minutes' % (hours, minutes)
-    elif minutes > 0:
-        return '%i minutes' % minutes
+    
+    descs = [
+        _get_desc('year', years),
+        _get_desc('day', td.days),
+        _get_desc('hour', hours),
+        _get_desc('minute', minutes),
+        _get_desc('second', td.seconds)
+    ]
+    descs = filter(lambda x: x, descs)
+    return ', '.join(descs[:2]) or 'a few seconds'
+
+def _get_desc(str_, num):
+    if not num:
+        return ''
+    if num == 1:
+        return '1 ' + str_
     else:
-        return '%i seconds' % td.seconds
+        return '%i %ss' % (num, str_)
 
 def _action_desc(action_id):
     if action_id == 'M':
