@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Recent Activity{% endblock %}
 {% block content %}
+<h2>Recent activity</h2>
 <table>
 {% for change in changes %}
     <tr>
         <td>{{change.user}}</td>
-        <td>{{change.action_desc}}</td>
+        <td>{{change.action_desc}} {% if change.url %}<a href="{{change.url}}">{% endif %}{{change.word}}{% if change.url %}</a>{% endif %}</td>
         <td>{{change.time_since}} ago</td>
     </tr>
 {% endfor %}
