@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Recent Activity{% endblock %}
+{% block content %}
+<table>
+{% for change in changes %}
+    <tr>
+        <td>{{change.user}}</td>
+        <td>{{change.action_desc}}</td>
+        <td>{{change.time_since}} ago</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}
+

@@ -64,3 +64,10 @@ def add_audit_trail_entry(old_record, new_record, user, user_notes=None):
                                    old_value_json=old_record_json,
                                    new_value_json=new_record_json)
     entry.save()
+
+def get_first_or_none(model, **kwargs):
+    objs = list(model.objects.filter(**kwargs)[:1])
+    if objs:
+        return objs[0]
+    return None
+
