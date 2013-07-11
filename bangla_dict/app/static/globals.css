@@ -47,6 +47,12 @@ TABLE TD
     padding-right: 0.25em;
 }
 
+THEAD TD,
+.SideHeading
+{
+    font-weight: bold;
+}
+
 .Message
 {
     color: green;
@@ -208,4 +214,16 @@ INPUT.Bangla
     color: blue;
     font-size: 10pt;
     padding: 0;
+}
+
+.TrueCheck,
+.FalseCheck
+{
+    font-size: 20px;
+    line-height: 15px;
+    color: green;
+}
+.FalseCheck
+{
+    color: #D00;
 }

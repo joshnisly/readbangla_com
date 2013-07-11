@@ -1,15 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Recent Activity{% endblock %}
 {% block content %}
-<h2>Recent activity</h2>
+<link rel="stylesheet" type="text/css" href="/static/audit_trail.css"/>
+<h2>Recent Activity</h2>
 <table>
 {% for change in changes %}
-    <tr>
+    <tr class="ChangeRow">
         <td>{{change.user}}</td>
         <td>{{change.action_desc}} {% if change.url %}<a href="{{change.url}}">{% endif %}{{change.word}}{% if change.url %}</a>{% endif %}</td>
         <td>{{change.time_since}} ago</td>
     </tr>
+    <tr class="ChangeDetailRow" xolddef="{{change.old_value_json}}" xnewdef="{{change.new_value_json}}">
+        <td colspan="3" class="Type{{change.action}}">
+            <!--<h2 class="Bangla" style="margin-bottom: 0.1em">{{change.word}}</h2>-->
+            <!-- Edit Samsad link -->
+            {% if change.action == 'M' and change.object_name == 'W' %}
+            <table>
+                <thead>
+                    <td></td>
+                    <td>Keyword</td>
+                    <td>Exact Match</td>
+                    <td>Entries Only</td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="SideHeading">New</td>
+                        <td>{{change.new.samsad_keyword}}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_exact_match %}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_entries_only %}</td>
+                    </tr>
+                    <tr>
+                        <td class="SideHeading">Old</td>
+                        <td>{{change.old.samsad_keyword}}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.old.samsad_exact_match %}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.old.samsad_entries_only %}</td>
+                    </tr>
+                <tbody>
+            </table>
+            {% endif %}
+            {% if change.action == 'D' or change.action == 'A' %}
+
+                <span style="float: right">Activity date: {{change.date}}</span>
+                <h2 class="Bangla" style="margin-bottom: 0.1em">{{change.word}}</h2>
+                <div>{{change.single.part_of_speech}} {{change.single.english_word}}</div>
+                {% if change.single.definition %}
+                <div>Definition: {{change.single.definition}}</div>
+                {% endif %}
+                {% if change.single.notes %}
+                <div>Notes: {{change.single.notes}}</div>
+                {% endif %}
+
+                {% if change.action == 'D' %}
+                <em>Added by {{change.added_by}} on {{change.added_on}}</em>
+                {% endif %}
+                
+            {% endif %}
+
+            {% if change.action == 'M' and change.object_name == 'D' %}
+            {{change.diff|safe}}
+            {% endif %}
+        </td>
+    </tr>
 {% endfor %}
 </table>
+<script type="text/javascript" src="/static/audit_trail.js"></script>
 {% endblock %}
 

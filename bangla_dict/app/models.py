@@ -108,6 +108,12 @@ class AuditTrailEntry(models.Model):
 
 admin.site.register(AuditTrailEntry)
 
+def get_part_of_speech_display(str_):
+    for key, value in PART_OF_SPEECH_CHOICES:
+        if key == str_:
+            return value
+
+    return str_
 
 
 ###############################################################################

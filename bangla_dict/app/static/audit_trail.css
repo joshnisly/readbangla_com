@@ -1,0 +1,58 @@
+.ChangeRow
+{
+    cursor: pointer;
+}
+
+.ChangeDetailRow
+{
+    display: none;
+}
+
+.ChangeDetailRow > TD
+{
+    padding: 0.25em;
+}
+
+.ChangeDetailRow .TypeD
+{
+    background-color: rgb(255, 221, 221);
+}
+
+.ChangeDetailRow .TypeA
+{
+    background-color: rgb(221, 255, 221);
+}
+
+.ChangeDetailRow H2
+{
+    margin-top: 0;
+}
+
+.ChangeDetailRow .diff_next,
+.ChangeDetailRow TBODY .diff_header
+{
+    display: none;
+}
+
+.ChangeDetailRow .diff_add
+{
+    background-color: rgb(221, 255, 221);
+}
+
+.ChangeDetailRow .diff_sub
+{
+    background-color: rgb(255, 221, 221);
+}
+
+.ChangeDetailRow TR,
+.ChangeDetailRow TH,
+.ChangeDetailRow TD
+{
+    border: hidden;
+    padding-top: 0.25em;
+}
+
+.ChangeDetailRow TD SPAN
+{
+    padding: 0.1em 0em;
+}
