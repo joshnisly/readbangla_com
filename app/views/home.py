@@ -1,5 +1,6 @@
 
 import datetime
+import difflib
 from django.core.urlresolvers import reverse
 from django.contrib.auth import decorators, authenticate, login, logout
 from django import forms
@@ -25,7 +26,10 @@ def recent_changes(request):
             try:
                 word_str = models.Word.objects.get(pk=single_obj['word'])
             except Exception:
-                word_str = None
+                deletion_entry = models.AuditTrailEntry.objects.get(object_name='W',
+                                                                    object_id=single_obj['word'],
+                                                                    action='D')
+                word_str = json.loads(deletion_entry.old_value_json)['word']
         elif entry.object_name == 'W' and entry.action == 'M' and \
                 (old_obj['samsad_keyword'] != new_obj['samsad_keyword'] or \
                 old_obj['samsad_entries_only'] != new_obj['samsad_entries_only'] or \
@@ -43,10 +47,30 @@ def recent_changes(request):
         if word_str:
             entry_dict['url'] = reverse(lookup.index, args=[word_str])
         entry_dict['action'] = entry.action
+        entry_dict['object_name'] = entry.object_name
         entry_dict['action_desc'] = u'%s %s' % (_action_desc(entry.action), changes_desc)
         entry_dict['word'] = word_str or '<deleted word>'
         entry_dict['old'] = old_obj
         entry_dict['new'] = new_obj
+        entry_dict['single'] = single_obj
+        entry_dict['added_by'] = models.UserProfile.objects.get(pk=single_obj['added_by'])
+        entry_dict['added_on'] = datetime.datetime.fromtimestamp(single_obj['added_on']).strftime('%m/%d/%Y %I:%M %P')
+
+        # Generate diff for modified definition
+        if entry.object_name == 'D' and entry.action == 'M':
+            def lines_from_def(obj):
+                return [
+                    'Part of speech: ' + models.get_part_of_speech_display(obj['part_of_speech']),
+                    'English: ' + obj['english_word'],
+                    'Definition: ' + obj['definition'],
+                    'Notes: ' + obj['notes']
+                ]
+            old_lines = lines_from_def(old_obj)
+            new_lines = lines_from_def(new_obj)
+
+            differ = difflib.HtmlDiff()
+            entry_dict['diff'] = differ.make_table(old_lines, new_lines, 'Old', 'New', context=False)
+        
 
         change_dicts.append(entry_dict)
     return helpers.run_template(request, 'home__recent_changes', {
