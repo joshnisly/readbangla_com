@@ -11,8 +11,9 @@ import entry
 import helpers
 import words
 
-from app import models
+from app import audit_trail
 from app import db_helpers
+from app import models
 from app import word_helpers
 
 ################################# Entrypoints
@@ -21,7 +22,7 @@ def index(request, word=None):
     json_str = ''
     is_english = False
     if word:
-        json_obj = _get_ajax_json_for_word_or_phrase(word)
+        json_obj = _get_ajax_json_for_word_or_phrase(request, word)
         json_str = json.dumps(json_obj)
         is_english = json_obj['is_english']
 
@@ -36,10 +37,10 @@ def index(request, word=None):
 @csrf_exempt
 @helpers.json_entrypoint
 def lookup_ajax(request):
-    return _get_ajax_json_for_word_or_phrase(request.JSON['word'])
+    return _get_ajax_json_for_word_or_phrase(request, request.JSON['word'])
 
 ##################### Internal
-def _get_ajax_json_for_word_or_phrase(input_str):
+def _get_ajax_json_for_word_or_phrase(request, input_str):
     word = word_helpers.simple_correct_spelling(input_str)
     word = word.strip()
     if ' ' in word:
@@ -53,16 +54,16 @@ def _get_ajax_json_for_word_or_phrase(input_str):
         }
         for phrase_word in phrase_words:
             if phrase_word.strip():
-                result['words'].append(_get_json_for_word(phrase_word))
+                result['words'].append(_get_json_for_word(request, phrase_word))
 
         return result
 
-    return _get_json_for_word(input_str)
+    return _get_json_for_word(request, input_str)
 
-def _get_json_for_word(word_str):
+def _get_json_for_word(request, word_str):
     word = word_str.strip()
     if word and word_helpers.is_ascii(word):
-        return _get_json_for_english_word(word_str)
+        return _get_json_for_english_word(request, word_str)
 
     word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
@@ -79,7 +80,7 @@ def _get_json_for_word(word_str):
         if match:
             result['dict_matches'].append({
                 'word': match.word,
-                'defs': [_get_def_dict(x) for x in match.definitions.all()],
+                'defs': [_get_def_dict(request, x) for x in match.definitions.all()],
                 'view_url': reverse(index, args=[match.word]),
                 'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
@@ -101,7 +102,7 @@ def _get_json_for_word(word_str):
 
     return result
 
-def _get_json_for_english_word(raw_word):
+def _get_json_for_english_word(request, raw_word):
     word = raw_word.strip()
     dict_matches = models.Definition.objects.filter(Q(english_word__icontains=word) |
                                                     Q(definition__icontains=word) |
@@ -122,7 +123,7 @@ def _get_json_for_english_word(raw_word):
     for word in matches:
         result['dict_matches'].append({
             'word': word.word,
-            'defs': [_get_def_dict(x) for x in matches[word]],
+            'defs': [_get_def_dict(request, x) for x in matches[word]],
             'view_url': reverse(index, args=[word.word]),
             'samsad_url': helpers.get_samsad_url_for_word_obj(word),
             'edit_samsad_url': reverse(entry.edit_samsad_url, args=[word.word]),
@@ -130,9 +131,16 @@ def _get_json_for_english_word(raw_word):
         })
     return result
 
-def _get_def_dict(def_obj):
+def _get_def_dict(request, def_obj):
     def_dict = db_helpers.def_obj_to_dict(def_obj)
     def_dict['edit_def_url'] = reverse(entry.edit_definition,
                                        args=[def_dict['id']])
+
+    #def_dict['edits'] = 
+    edits = audit_trail.format_audit_trail_entries(audit_trail.get_def_modify_entries(def_obj))
+    def_dict['num_edits'] = len(edits)
+    def_dict['edits_html'] = helpers.get_template_content(request, 'changes_table', {
+        'changes': edits
+    })
     return def_dict
 
