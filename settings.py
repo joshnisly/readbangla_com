@@ -7,6 +7,7 @@ TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Josh Nisly', 'bangla@joshnisly.com'),
+    ('Ellis Miller', 'ellism@codecraftersintl.com'),
 )
 
 PREFIX = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +25,7 @@ DATABASES = {
     }
 }
 
-HOST='bangla.joshnisly.com'
+HOST='www.readbangla.com'
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#allowed-hosts
