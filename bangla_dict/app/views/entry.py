@@ -33,7 +33,8 @@ def edit_samsad_url(request, word_str):
         return HttpResponseRedirect(reverse(lookup.index, args=[word_str]))
 
     if request.method == 'POST' and request.POST.get('Action') == 'Submit':
-        word.samsad_keyword = request.POST['Keyword']
+        raw_keyword = request.POST['Keyword']
+        word.samsad_keyword = raw_keyword if raw_keyword != word.word else ''
         word.samsad_entries_only = 'EntriesOnly' in request.POST
         word.samsad_exact_match = 'ExactMatch' in request.POST
         old_word = models.Word.objects.get(pk=word.id)

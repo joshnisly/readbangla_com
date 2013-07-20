@@ -24,16 +24,16 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="SideHeading">New</td>
-                        <td>{{change.new.samsad_keyword}}</td>
-                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_exact_match %}</td>
-                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_entries_only %}</td>
-                    </tr>
-                    <tr>
                         <td class="SideHeading">Old</td>
-                        <td>{{change.old.samsad_keyword}}</td>
+                        <td>{{change.old.samsad_keyword|default:change.word}}</td>
                         <td>{% include "checkbox_snippet.html" with value=change.old.samsad_exact_match %}</td>
                         <td>{% include "checkbox_snippet.html" with value=change.old.samsad_entries_only %}</td>
+                    </tr>
+                    <tr>
+                        <td class="SideHeading">New</td>
+                        <td>{{change.new.samsad_keyword|default:change.word}}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_exact_match %}</td>
+                        <td>{% include "checkbox_snippet.html" with value=change.new.samsad_entries_only %}</td>
                     </tr>
                 <tbody>
             </table>
