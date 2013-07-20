@@ -2,6 +2,7 @@
 {% block title %}Recent Activity{% endblock %}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="/static/audit_trail.css"/>
+<div style="display: inline-block">
 <h2>Recent Activity</h2>
 <table>
 {% for change in changes %}
@@ -63,6 +64,26 @@
     </tr>
 {% endfor %}
 </table>
+
+{% if page.paginator.num_pages > 1%}
+<div class="Pagination" style="text-align: center">
+    <span class="">
+        {% if page.has_previous %}
+            <a href="?page={{ page.previous_page_number }}">&lt; Newer</a>
+        {% endif %}
+
+        <span class="ThisPage">
+            {{ page.number }} of {{ page.paginator.num_pages }}
+        </span>
+
+        {% if page.has_next %}
+            <a href="?page={{ page.next_page_number }}">Older &gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+</div>
 <script type="text/javascript" src="/static/audit_trail.js"></script>
 {% endblock %}
 
