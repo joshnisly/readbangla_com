@@ -44,7 +44,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def _launch_text(self, text):
         text = re.sub('[()\r\n]', '', text)
         url_text = urllib.quote(text.encode('utf8'))
-        url = 'http://bangla.joshnisly.com/lookup/%s/' % url_text
+        url = 'http://www.readbangla.com/lookup/%s/' % url_text
         webbrowser.open(url)
 
 
