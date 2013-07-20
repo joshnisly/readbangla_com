@@ -61,7 +61,6 @@ function createDefSection(word, parent)
             var defLine = '(' + getPartOfSpeechDisplay(def.part_of_speech) + ') ' + def.english_word + ' ';
             var defLineWrapper = defWrapper.appendNewChild('DIV');
             defLineWrapper.appendNewChild('SPAN').text(defLine);
-            defLineWrapper.appendNewChild('A').attr('href', def.edit_def_url).text('(edit)');
             if (def.definition)
             {
                 var defLine = 'Definition: ' + def.definition;
@@ -73,10 +72,27 @@ function createDefSection(word, parent)
                 appendTextWithBanglaLinks(defWrapper.appendNewChild('DIV', '', 'DefSection'), notesLine, buildLookupUrl);
             }
 
-            var addedWrapper = defWrapper.appendNewChild('DIV', '', 'WordAddedWrapper');
-            var addedLine = 'Added by ' + def['added_by'];
-            addedLine += ' on ' + def['added_on_date'] + ' ' + def['added_on_time'];
+            var bottomWrapper = defWrapper.appendNewChild('DIV', '', 'BottomWrapper');
+            var addedWrapper = bottomWrapper.appendNewChild('DIV', '', 'WordAddedWrapper');
+
+            // Create "Added by" box
+            var addedDate = new Date(def['added_on'] * 1000);
+            var addedLine = 'Added ' + addedDate.toString('MMM d')
+            if (addedDate.getYear() != (new Date()).getYear())
+                addedLine += addedDate.toString(' \'yy')
+            addedLine += ' at ' + addedDate.toString('h:mm tt');
+            addedLine += '\nby ' + def['added_by'];
             addedWrapper.text(addedLine)
+
+            bottomWrapper.appendNewChild('A', '', 'EditDefLink').attr('href', def.edit_def_url).text('edit');
+            if (def.num_edits)
+            {
+                bottomWrapper.appendNewChild('SPAN').text(' | ');
+                bottomWrapper.appendNewChild('BUTTON', '', 'LinkLikeButton ToggleEditsBtn').attr('href', def.edit_def_url).text(def.num_edits + ' edits');
+            }
+            bottomWrapper.appendNewChild('DIV').css('clear', 'both');
+            if (def.num_edits)
+                bottomWrapper.appendNewChild('DIV', '', 'EditsWrapper').html(def.edits_html)
         }
     }
     var bottomWrapper = wrapper.appendNewChild('DIV');
@@ -255,12 +271,22 @@ $(document).ready(function() {
         doAjaxLookup();
 
     $(document).bind('click', function(event) {
-        var button = $(event.target).closest('BUTTON[xsamsadurl]');
-        if (!button.length)
+        var target = $(event.target);
+        var button = target.closest('BUTTON[xsamsadurl]');
+        if (button.length)
+        {
+            loadSamsadPane(button.attr('xsamsadurl'));
             return;
+        }
+        if (target.hasClass('ToggleEditsBtn'))
+        {
+            target.closest('.WordDefWrapper').find('.EditsWrapper').toggle();
+            return;
+        }
 
-        loadSamsadPane(button.attr('xsamsadurl'));
     });
+
+    $(document)
 
     History.Adapter.bind(window,'popstate',function() {
         var state = History.getState(); // Note: We are using History.getState() instead of event.state

@@ -1,10 +1,14 @@
 import datetime
 import difflib
 from django.core.urlresolvers import reverse
-import models
 import json
 
+import models
+
 import views.lookup
+
+def get_def_modify_entries(def_obj):
+    return models.AuditTrailEntry.objects.filter(object_id=def_obj.id, action='M').order_by('-id')
 
 def format_audit_trail_entries(entries):
     change_dicts = []

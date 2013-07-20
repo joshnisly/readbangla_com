@@ -13,11 +13,16 @@ def run_template(request, template_name, parms,
                 template_file_override=None,
                 template_ext='html',
                 content_type=None):
-    # Find this page as part of the page structure
-    top, ignored, sub = template_name.partition('__')
-    sub = sub.replace('_', ' ')
-    top = top.replace('_', ' ')
+    content = get_template_content(request, template_name, parms,
+                                   template_file_override, template_ext)
+    response = HttpResponse(content)
+    if not content_type is None:
+        response['Content-Type'] = content_type 
+    return response
 
+def get_template_content(request, template_name, parms,
+                         template_file_override=None,
+                         template_ext='html'):
     ua = request.META['HTTP_USER_AGENT'].lower()
     is_mobile = 'mobile' in ua or 'tablet' in ua
 
@@ -36,10 +41,7 @@ def run_template(request, template_name, parms,
     parms['request'] = request
     parms['is_mobile'] = is_mobile
     context = RequestContext(request, parms)
-    response = HttpResponse(template.render(context))
-    if not content_type is None:
-        response['Content-Type'] = content_type 
-    return response
+    return template.render(context)
 
 def send_email(to_list, subject, parms, template_name, cc=[], bcc=[], replyto=None):
     template = loader.get_template(template_name + '.txt')
