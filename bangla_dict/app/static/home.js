@@ -4,6 +4,8 @@ var lookupLinkUrl = '/lookup/';
 var avro = OmicronLab.Avro.Phonetic;
 var lastResult = null;
 
+var isShowingBanglaChart = false;
+
 function isAscii(str)
 {
     for (var i = 0; i < str.length; i++)
@@ -246,6 +248,18 @@ function onWordChange()
     $('#LookupBtn').show();
 }
 
+function showBanglaChart()
+{
+    $('#BanglaChartWrapper').show();
+    isShowingBanglaChart = true;
+}
+
+function hideBanglaChart()
+{
+    $('#BanglaChartWrapper').hide();
+    isShowingBanglaChart = false;
+}
+
 $(document).ready(function() {
     $('#BanglaWord').bind('input', onWordChange);
     $('INPUT[type=radio]').bind('change', onWordChange);
@@ -272,6 +286,10 @@ $(document).ready(function() {
 
     $(document).bind('click', function(event) {
         var target = $(event.target);
+
+        if (isShowingBanglaChart && !target.closest('#BanglaChartWrapper').length)
+            hideBanglaChart();
+
         var button = target.closest('BUTTON[xsamsadurl]');
         if (button.length)
         {
@@ -283,10 +301,24 @@ $(document).ready(function() {
             target.closest('.WordDefWrapper').find('.EditsWrapper').toggle();
             return;
         }
-
     });
 
-    $(document)
+    $('#LookupBtn').bind('click', doAjaxLookup);
+
+    $('#ShowBanglaChartBtn').bind('click', function() {
+        if (!isShowingBanglaChart)
+        {
+            showBanglaChart();
+            return false;
+        }
+    });
+
+    $(document).bind('keydown', function(event) {
+        if (event.keyCode == 27)
+            hideBanglaChart();
+    });
+
+    createBanglaChart($('#BanglaChartWrapper'));
 
     History.Adapter.bind(window,'popstate',function() {
         var state = History.getState(); // Note: We are using History.getState() instead of event.state
