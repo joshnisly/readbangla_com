@@ -184,7 +184,7 @@ function handleResults(result)
         result.word_url != window.location.pathname &&
         result.word_url.length < 100)
     {
-        window.History.pushState(result, 'Lookup results', result.word_url);
+        window.History.pushState(result, 'Lookup results - ' + lastResult, result.word_url);
     }
 
     var resultsElem = $('#Results');
@@ -324,9 +324,14 @@ $(document).ready(function() {
         var state = History.getState(); // Note: We are using History.getState() instead of event.state
         if (state && state.data.word)
         {
-            var result = state.data;
-            $('#BanglaWord').val(result.word);
-            handleResults(result);
+            if (!preloadedData || (state.data.word != preloadedData.word || preloadedData.word != lastResult))
+            {
+                var dataToLoad = state.data;
+                if (preloadedData && preloadedData.word == state.data.word)
+                    dataToLoad = preloadedData;
+                $('#BanglaWord').val(dataToLoad.word);
+                handleResults(dataToLoad);
+            }
         }
     });
 });
