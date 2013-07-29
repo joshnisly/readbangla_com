@@ -2,6 +2,8 @@
 
 import httplib
 import threading
+import time
+import os
 import Queue
 
 HOST = 'www.readbangla.com'
@@ -18,6 +20,7 @@ class _UploadThread(threading.Thread):
         try:
             while True:
                 file_path = self._message_queue.get()
+                print file_path
                 if file_path is None:
                     break
 
@@ -34,6 +37,8 @@ class _UploadThread(threading.Thread):
             body = open(file_path, 'rb')
             conn.request('POST', PATH, body=body)
             res = conn.getresponse()
+            print res.status
+            print res.read()
         except Exception, e:
             print e
             self._message_queue.put(file_path)
