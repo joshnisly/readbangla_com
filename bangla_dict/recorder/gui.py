@@ -184,7 +184,7 @@ class BurnDialog(QtGui.QDialog):
         
     def _get_lame_path(self):
         if os.name == 'nt':
-            return os.path.join(os.path.abspath(os.path.dirname(__file__)), 'lame.exe')
+            return os.path.join(self._working_dir, 'lame.exe')
         else:
             return 'lame'
 
@@ -194,7 +194,10 @@ def _ensure_parent_dir(path):
         os.makedirs(os.path.dirname(path))
 
 if __name__ == '__main__':
-    working_dir = os.path.dirname(os.path.abspath(__file__))
+    if hasattr(sys, 'frozen'):
+        working_dir = os.path.dirname(os.path.abspath(sys.executable))
+    else:
+        working_dir = os.path.dirname(os.path.abspath(__file__))
     app = QtGui.QApplication(sys.argv)
     dlg = BurnDialog(working_dir)
     dlg.show()
