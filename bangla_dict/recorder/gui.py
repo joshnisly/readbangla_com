@@ -86,6 +86,11 @@ class BurnDialog(QtGui.QDialog):
         self._recorder = recording.Recorder(self._temp_path, self)
         self._uploader = uploading.Uploader(self)
 
+        self._error_to_display = None
+        self._error_timer = QtCore.QTimer(self)
+        self.connect(self._error_timer, QtCore.SIGNAL('timeout()'), self._display_error)
+        self._error_timer.start(100)
+
         self._download() # TODO: remove this after testing
 
     def reject(self):
@@ -94,11 +99,12 @@ class BurnDialog(QtGui.QDialog):
         QtGui.QDialog.reject(self)
 
     def on_error(self, error):
-        self._display_error = error
-        QtGui.QTimer.singleShot(
+        self._error_to_display = error
 
     def _display_error(self):
-        QtGui.QMessageBox.critical(self, 'Error', self._display_error)
+        if self._error_to_display:
+            QtGui.QMessageBox.critical(self, 'Error', self._error_to_display)
+            self._error_to_display = None
         
     def on_recording_finish(self):
         self._update_ui()
@@ -167,13 +173,14 @@ class BurnDialog(QtGui.QDialog):
             return
 
         time.sleep(0.1)
-        self._recorder.start_stop()
+        self._recorder.start_stop(False)
         time.sleep(2)
         self._recorder.start_stop()
 
         silence_level = self._recorder.get_90th_percentile()
         msg = 'Silence calibration complete\nSound level: %i.' % silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
+        self._recorder.set_threshold(silence_level)
         
     def _get_lame_path(self):
         if os.name == 'nt':

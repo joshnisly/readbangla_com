@@ -10,7 +10,7 @@ import sys
 import time
 import wave
 
-THRESHOLD = 5500
+THRESHOLD = 1500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
 RATE = 44100
@@ -29,6 +29,8 @@ class _RecordThread(threading.Thread):
         self._audio = array.array('h')
         self._snd_started = False
         self._num_silent = 0
+        self._should_trim = True
+        self._threshold = THRESHOLD
 
     def __del__(self):
         self._pyaudio.terminate()
@@ -48,6 +50,11 @@ class _RecordThread(threading.Thread):
                     break
 
             if event == 'start':
+                self._should_trim = True
+                self._start()
+
+            if event == 'startnotrim':
+                self._should_trim = False
                 self._start()
 
             if event == 'stop':
@@ -68,7 +75,7 @@ class _RecordThread(threading.Thread):
                         self._snd_started = True
                     self._num_silent = 0
 
-                if self._snd_started and self._num_silent > 30:
+                if self._snd_started and self._num_silent > 15 and self._should_trim:
                     self._finish()
                     continue
 
@@ -80,8 +87,11 @@ class _RecordThread(threading.Thread):
     def get_90th_percentile(self):
         data = [abs(x) for x in list(self._audio)]
         data.sort()
-        data = data[:len(data) / 10]
-        return data[-1]
+        data = data[int(len(data) * 0.95):]
+        return data[0]
+
+    def set_threshold(self, threshold):
+        self._threshold = threshold
 
     def _start(self):
         assert not self._is_recording
@@ -99,8 +109,10 @@ class _RecordThread(threading.Thread):
         self._stream.close()
         self._stream = None
 
-        data = self._normalize(self._audio)
-        data = self._trim_silence(data)
+        data = self._audio
+        if self._should_trim:
+            data = self._trim_silence(data)
+            data = self._normalize(data)
         data = struct.pack('<' + ('h'*len(data)), *data)
 
         if os.path.exists(self._output_path):
@@ -131,7 +143,7 @@ class _RecordThread(threading.Thread):
             r = array.array('h')
 
             for i in snd_data:
-                if not snd_started and abs(i) > THRESHOLD:
+                if not snd_started and abs(i) > self._threshold:
                     snd_started = True
                     r.append(i)
 
@@ -149,7 +161,8 @@ class _RecordThread(threading.Thread):
         return snd_data
 
     def _is_silent(self, snd_data):
-        return max(snd_data) < THRESHOLD
+        print max(snd_data) < self._threshold, self._threshold
+        return max(snd_data) < self._threshold
 
 class Recorder(object):
     def __init__(self, output_path, parent):
@@ -157,13 +170,16 @@ class Recorder(object):
         self._record_thread = _RecordThread(output_path, self._message_queue, parent)
         self._record_thread.start()
 
-    def start_stop(self):
+    def start_stop(self, should_normalize=True):
         if self.is_recording():
             self._message_queue.put('stop')
         else:
-            self._message_queue.put('start')
+            self._message_queue.put('start' if should_normalize else 'startnotrim')
 
         time.sleep(0.1)
+
+    def set_threshold(self, threshold):
+        self._record_thread.set_threshold(threshold)
 
     def get_90th_percentile(self):
         return self._record_thread.get_90th_percentile()
