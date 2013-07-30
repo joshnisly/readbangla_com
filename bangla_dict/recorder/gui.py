@@ -172,12 +172,12 @@ class BurnDialog(QtGui.QDialog):
         if response != QtGui.QMessageBox.Ok:
             return
 
-        time.sleep(0.1)
+        time.sleep(0.25)
         self._recorder.start_stop(False)
         time.sleep(2)
         self._recorder.start_stop()
 
-        silence_level = self._recorder.get_90th_percentile()
+        silence_level = self._recorder.get_90th_percentile() * 1.5
         msg = 'Silence calibration complete\nSound level: %i.' % silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
         self._recorder.set_threshold(silence_level)
