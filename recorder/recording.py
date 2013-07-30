@@ -27,9 +27,9 @@ class _RecordThread(threading.Thread):
         self._is_recording = False
         self._stream = None
         self._audio = array.array('h')
-        self._snd_started = False
+        self._num_audible = 0
         self._num_silent = 0
-        self._should_trim = True
+        self._should_normalize = True
         self._threshold = THRESHOLD
 
     def __del__(self):
@@ -50,11 +50,11 @@ class _RecordThread(threading.Thread):
                     break
 
             if event == 'start':
-                self._should_trim = True
+                self._should_normalize = True
                 self._start()
 
-            if event == 'startnotrim':
-                self._should_trim = False
+            if event == 'startnonormalize':
+                self._should_normalize = False
                 self._start()
 
             if event == 'stop':
@@ -68,14 +68,13 @@ class _RecordThread(threading.Thread):
                 # See if we need to stop
                 silent = self._is_silent(snd_data)
                 if silent:
-                    if self._snd_started:
+                    if self._num_audible > 15:
                         self._num_silent += 1
                 else:
-                    if not self._snd_started:
-                        self._snd_started = True
+                    self._num_audible += 1
                     self._num_silent = 0
 
-                if self._snd_started and self._num_silent > 15 and self._should_trim:
+                if self._num_silent > 15 and self._should_normalize:
                     self._finish()
                     continue
 
@@ -110,7 +109,7 @@ class _RecordThread(threading.Thread):
         self._stream = None
 
         data = self._audio
-        if self._should_trim:
+        if self._should_normalize:
             data = self._trim_silence(data)
             data = self._normalize(data)
         data = struct.pack('<' + ('h'*len(data)), *data)
@@ -125,7 +124,7 @@ class _RecordThread(threading.Thread):
         wf.close()
 
         self._is_recording = False
-        self._snd_started = False
+        self._num_audible = 0
         self._num_silent = 0
         self._parent.on_recording_finish()
 
@@ -174,7 +173,7 @@ class Recorder(object):
         if self.is_recording():
             self._message_queue.put('stop')
         else:
-            self._message_queue.put('start' if should_normalize else 'startnotrim')
+            self._message_queue.put('start' if should_normalize else 'startnonormalize')
 
         time.sleep(0.1)
 
