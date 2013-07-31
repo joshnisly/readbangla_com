@@ -1,4 +1,5 @@
 
+from django.contrib.auth import authenticate
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.template import Context, RequestContext, loader
@@ -69,6 +70,26 @@ def json_entrypoint(func):
 
         json_str = json.dumps(response)
         return HttpResponse(json_str, mimetype='text/javascript')
+    return wrap
+
+def http_basic_auth(func):
+    def wrap(request, *a, **kw):
+        auth = request.META.get('HTTP_AUTHORIZATION')
+        if auth:
+            method, auth = auth.split(' ', 1)
+            if method.lower() == 'basic':
+                auth = auth.strip().decode('base64')
+                username, password = auth.split(':', 1)
+                user = authenticate(username=username, password=password)
+                if user and user.is_active:
+                    request.user = user
+                    return func(request, *a, **kw)
+                    
+        res = HttpResponse('Authorization Required', mimetype='text/plain')
+        res['WWW-Authenticate'] = 'Basic realm="BanglaDict"'
+        res.status_code = 401
+        return res
+
     return wrap
 
 def get_first_or_none(model, **kwargs):

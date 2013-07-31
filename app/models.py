@@ -70,6 +70,18 @@ class Definition(models.Model):
 
 admin.site.register(Definition)
 
+class AudioRecording(models.Model):
+    word = models.ForeignKey(Word)
+    audio = models.FileField(upload_to='audio')
+
+    added_by = models.ForeignKey(UserProfile)
+    added_on = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return '%s (added by %s on %s)' % (self.word.word, self.added_by, self.added_on)
+
+admin.site.register(AudioRecording)
+
 class ExternalWord(models.Model):
     word = models.CharField(max_length=50, unique=True)
 

@@ -1,4 +1,6 @@
+from django.contrib.auth import decorators
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
 
 import helpers
 
@@ -23,3 +25,8 @@ def recent_changes(request):
         'changes': changes,
         'page': entries
     })
+
+@helpers.http_basic_auth
+def test_auth(request):
+    assert request.user.is_authenticated()
+    return HttpResponse('')

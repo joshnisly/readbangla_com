@@ -4,6 +4,7 @@ import app.views.auth
 import app.views.entry
 import app.views.home
 import app.views.lookup
+import app.views.recordings
 import app.views.words
 
 urlpatterns = patterns('',
@@ -13,6 +14,8 @@ urlpatterns = patterns('',
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
     (r'^words/random/$', app.views.words.random),
+
+    (r'^test_auth/$', app.views.home.test_auth),
 
     # Entry
     (r'^entry/new_def/(.+)/$', app.views.entry.enter_definition), # This url is referenced in JS.
@@ -32,4 +35,8 @@ urlpatterns = patterns('',
     (r'^logout/$', app.views.auth.auth_logout),
     (r'^signup/$', app.views.auth.signup),
     (r'^signup/approve/(\d+)/$', app.views.auth.approve_signup),
+
+    # Called by recorder client
+    (r'^recordings/upload/$', app.views.recordings.upload),
+    (r'^recordings/needed_words/$', app.views.recordings.download_needed),
 )
