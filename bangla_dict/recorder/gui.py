@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import ConfigParser
 import os
 import pyaudio
 import play
@@ -9,17 +10,56 @@ import sys
 import threading
 import time
 
+import helpers
 import recording
 import uploading
 
-class BurnDialog(QtGui.QDialog):
+class Settings(object):
+    def __init__(self, path):
+        self._values = {}
+        self._path = path
+        parser = ConfigParser.ConfigParser()
+        parser.read(path)
+        if parser.has_section('Settings'):
+            for setting, value in parser.items('Settings'):
+                self._values[setting.lower()] = value
+
+    def save(self):
+        parser = ConfigParser.ConfigParser()
+        for setting, value in self._values.items():
+            parser.set('Settings', setting.lower(), value)
+        parser.write(open(self._path, 'w'))
+
+
+    def get_setting(self, setting, default=None):
+        return self._values.get(setting.lower(), default)
+
+    def set_setting(self, setting, value):
+        self._values[setting.lower()] = values
+
+class RecorderDialog(QtGui.QDialog):
     def __init__(self, working_dir, parent=None):
         QtGui.QDialog.__init__(self, parent)
         self.setWindowTitle(self.tr('Bangla Recorder Client'))
 
         self._is_playing = False
+        self._working_dir = working_dir
 
         self._remaining_words = []
+
+        self._settings = Settings(os.path.join(self._working_dir, 'settings.ini'))
+
+        self._temp_path = os.path.join(self._working_dir, 'temp', 'testing.wav')
+        _ensure_parent_dir(self._temp_path)
+        self._message_queue = Queue.Queue()
+        self._recorder = recording.Recorder(self._temp_path, self)
+        self._uploader = uploading.Uploader(self, self._settings.get_setting('username', ''),
+                                            self._settings.get_setting('password', ''))
+
+        self._error_to_display = None
+        self._error_timer = QtCore.QTimer(self)
+        self.connect(self._error_timer, QtCore.SIGNAL('timeout()'), self._display_error)
+        self._error_timer.start(100)
 
         full_layout = QtGui.QVBoxLayout()
 
@@ -45,6 +85,8 @@ class BurnDialog(QtGui.QDialog):
         middle_layout.addWidget(self._words_list)
         middle_layout.addStretch()
         full_layout.addLayout(middle_layout)
+
+        self.connect(self._words_list.selectionModel(), QtCore.SIGNAL('currentChanged(const QModelIndex&, const QModelIndex&)'), self._on_word_selected)
 
         recording_layout = QtGui.QVBoxLayout()
         recording_layout.setSpacing(20)
@@ -79,18 +121,6 @@ class BurnDialog(QtGui.QDialog):
         self.setLayout(full_layout)
         self.setMinimumSize(500, 350)
 
-        self._working_dir = working_dir
-        self._temp_path = os.path.join(self._working_dir, 'temp', 'testing.wav')
-        _ensure_parent_dir(self._temp_path)
-        self._message_queue = Queue.Queue()
-        self._recorder = recording.Recorder(self._temp_path, self)
-        self._uploader = uploading.Uploader(self)
-
-        self._error_to_display = None
-        self._error_timer = QtCore.QTimer(self)
-        self.connect(self._error_timer, QtCore.SIGNAL('timeout()'), self._display_error)
-        self._error_timer.start(100)
-
         self._download() # TODO: remove this after testing
 
     def reject(self):
@@ -110,8 +140,15 @@ class BurnDialog(QtGui.QDialog):
         self._update_ui()
 
     def _download(self):
-        self._remaining_words = [u'\u099C\u09AF\u09BC']
-        self._update_ui()
+        try:
+            response = helpers.request_with_auth('/recordings/needed_words/',
+                                                 self._settings.get_setting('username', ''),
+                                                 self._settings.get_setting('password', ''))
+            self._remaining_words = response.split('\n')
+        except Exception, e:
+            self.on_error(str(e))
+
+        self._update_ui(True)
 
     def _get_cur_word(self):
         cur_word = ''
@@ -119,11 +156,14 @@ class BurnDialog(QtGui.QDialog):
             cur_word = self._remaining_words[self._words_list.currentRow()]
         return cur_word
 
-    def _update_ui(self):
-        while self._words_list.count() > 0:
-            self._words_list.takeItem(0)
+    def _update_ui(self, reload_words_list=False):
+        if reload_words_list:
+            while self._words_list.count() > 0:
+                self._words_list.takeItem(0)
 
-        self._words_list.addItems(self._remaining_words)
+            self._words_list.addItems(self._remaining_words)
+            self._words_list.setCurrentIndex(self._words_list.model().index(0, 0))
+
         self._cur_word_label.setText(self._get_cur_word())
 
         text = '&Stop Recording' if self._recorder.is_recording() else '&Record'
@@ -159,9 +199,12 @@ class BurnDialog(QtGui.QDialog):
             _ensure_parent_dir(target_path)
             os.rename(self._temp_path + '.mp3', target_path)
 
-            self._uploader.add_item(target_path)
+            self._uploader.add_item(target_path, cur_word)
         except Exception, e:
             self.on_error(str(e))
+
+    def _on_word_selected(self, index, old_index):
+        self._update_ui()
 
     def _calibrate(self):
         assert not self._recorder.is_recording()
@@ -199,7 +242,7 @@ if __name__ == '__main__':
     else:
         working_dir = os.path.dirname(os.path.abspath(__file__))
     app = QtGui.QApplication(sys.argv)
-    dlg = BurnDialog(working_dir)
+    dlg = RecorderDialog(working_dir)
     dlg.show()
     sys.exit(dlg.exec_())
 

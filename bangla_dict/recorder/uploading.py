@@ -6,41 +6,46 @@ import time
 import os
 import Queue
 
-HOST = 'www.readbangla.com'
-PORT = 80
-PATH = '/upload_recording/'
+import helpers
+
+PATH = '/recordings/upload/'
 
 class _UploadThread(threading.Thread):
-    def __init__(self, message_queue, parent):
+    def __init__(self, message_queue, parent, username, password):
         threading.Thread.__init__(self)
         self._message_queue = message_queue
         self._parent = parent
+        self._username = username
+        self._password = password
 
     def run(self):
         try:
             while True:
-                file_path = self._message_queue.get()
-                print file_path
-                if file_path is None:
+                message = self._message_queue.get()
+                if message is None:
                     break
 
-                self._upload_file(file_path)
-                time.sleep(0.1)
+                file_path, word_str = message
+                self._upload_file(file_path, word_str)
+                time.sleep(1)
         except Exception, e:
-            text = str(e)
+            text = unicode(e.message)
             self._parent.on_error(text)
 
 
-    def _upload_file(self, file_path):
+    def _upload_file(self, file_path, word_str):
         try:
-            conn = httplib.HTTPConnection(HOST, PORT)
             body = open(file_path, 'rb')
-            conn.request('POST', PATH, body=body)
-            res = conn.getresponse()
-            print res.status
-            print res.read()
+            query_parms = {
+                'word': word_str.encode('utf8')
+            }
+            response = helpers.request_with_auth(PATH, self._username, self._password,
+                                                 query_parms=query_parms, post_data=body)
         except Exception, e:
+            print 'error'
             print e
+            #open('error.txt', 'wb').write(
+            self._parent.on_error(unicode(e.message))
             self._message_queue.put(file_path)
             return
 
@@ -48,13 +53,13 @@ class _UploadThread(threading.Thread):
         
 
 class Uploader(object):
-    def __init__(self, parent):
+    def __init__(self, parent, username, password):
         self._message_queue = Queue.Queue()
-        self._upload_thread = _UploadThread(self._message_queue, parent)
+        self._upload_thread = _UploadThread(self._message_queue, parent, username, password)
         self._upload_thread.start()
 
-    def add_item(self, file_path):
-        self._message_queue.put(file_path)
+    def add_item(self, file_path, word_str):
+        self._message_queue.put((file_path, word_str))
 
     def quit(self):
         self._message_queue.put(None)
