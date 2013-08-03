@@ -184,8 +184,10 @@ function handleResults(result)
         result.word_url != window.location.pathname &&
         result.word_url.length < 100)
     {
-        window.History.pushState(result, 'Lookup results - ' + lastResult, result.word_url);
+        window.History.pushState(result, 'Lookup results for ' + result.corrected_word, result.word_url);
     }
+    document.title = 'Lookup results for ' + result.corrected_word;
+    $('#BanglaWord').val(result.corrected_word);
 
     var resultsElem = $('#Results');
     $('#Throbber').hide();
@@ -329,7 +331,6 @@ $(document).ready(function() {
                 var dataToLoad = state.data;
                 if (preloadedData && preloadedData.word == state.data.word)
                     dataToLoad = preloadedData;
-                $('#BanglaWord').val(dataToLoad.word);
                 handleResults(dataToLoad);
             }
         }
