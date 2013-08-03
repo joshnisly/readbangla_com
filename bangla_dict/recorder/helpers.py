@@ -3,13 +3,11 @@
 import httplib
 import urllib
 
-#HOST = 'www.readbangla.com'
-HOST = 'localhost'
-#PORT = '80'
-PORT = '8000'
+class BadAuth(Exception):
+    pass
 
-def request_with_auth(path, username, password, query_parms=None, post_data=None):
-    conn = httplib.HTTPConnection(HOST, PORT)
+def request_with_auth(host, port, path, username, password, query_parms=None, post_data=None):
+    conn = httplib.HTTPConnection(host, int(port))
     headers = {}
     if username:
         assert password
@@ -22,6 +20,8 @@ def request_with_auth(path, username, password, query_parms=None, post_data=None
 
     conn.request('POST' if post_data else 'GET', path, body=post_data, headers=headers)
     response = conn.getresponse()
+    if response.status == 401:
+        raise BadAuth, 'Invalid username or password.'
     if response.status != 200:
         raise ValueError, 'Invalid response: ' + response.read().decode('utf8')
 

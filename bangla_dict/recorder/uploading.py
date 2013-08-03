@@ -11,10 +11,12 @@ import helpers
 PATH = '/recordings/upload/'
 
 class _UploadThread(threading.Thread):
-    def __init__(self, message_queue, parent, username, password):
+    def __init__(self, message_queue, parent, host, port, username, password):
         threading.Thread.__init__(self)
         self._message_queue = message_queue
         self._parent = parent
+        self._host = host
+        self._port = port
         self._username = username
         self._password = password
 
@@ -39,7 +41,8 @@ class _UploadThread(threading.Thread):
             query_parms = {
                 'word': word_str.encode('utf8')
             }
-            response = helpers.request_with_auth(PATH, self._username, self._password,
+            response = helpers.request_with_auth(self._host, self._port, PATH,
+                                                 self._username, self._password,
                                                  query_parms=query_parms, post_data=body)
         except Exception, e:
             print 'error'
@@ -53,9 +56,9 @@ class _UploadThread(threading.Thread):
         
 
 class Uploader(object):
-    def __init__(self, parent, username, password):
+    def __init__(self, parent, host, port, username, password):
         self._message_queue = Queue.Queue()
-        self._upload_thread = _UploadThread(self._message_queue, parent, username, password)
+        self._upload_thread = _UploadThread(self._message_queue, host, port, parent, username, password)
         self._upload_thread.start()
 
     def add_item(self, file_path, word_str):
