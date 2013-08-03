@@ -36,10 +36,18 @@ def upload(request):
     return HttpResponse('success')
     
 def download_needed(request):
-    limit = 100
+    LIMIT = 100
     recently_added = models.AuditTrailEntry.objects.filter(object_name='W', action='A').order_by('-id')
-    recently_added = [helpers.get_first_or_none(models.Word, pk=x.object_id) for x in recently_added]
-    recently_added = filter(lambda x: x and not x.audiorecording_set.count(), recently_added)
 
-    words = [x.word for x in recently_added]
+    # Load words
+    recently_added = [helpers.get_first_or_none(models.Word, pk=x.object_id) for x in recently_added]
+
+    # Filter out deleted words and words that already have a recording.
+    words = filter(lambda x: x and not x.audiorecording_set.count(), recently_added)
+
+    # If we don't have enough recently added words, look at other words.
+    if len(words) < LIMIT:
+        words.extend(models.Word.objects.filter(audiorecording=None).order_by('word')[:LIMIT-len(words)])
+
+    words = [x.word for x in words]
     return HttpResponse('\n'.join(words), mimetype='text/plain')
