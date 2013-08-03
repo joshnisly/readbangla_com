@@ -26,16 +26,18 @@ class Settings(object):
 
     def save(self):
         parser = ConfigParser.ConfigParser()
+        parser.add_section('Settings')
         for setting, value in self._values.items():
             parser.set('Settings', setting.lower(), value)
-        parser.write(open(self._path, 'w'))
+        with open(self._path, 'w') as output_file:
+            parser.write(output_file)
 
 
     def get_setting(self, setting, default=None):
         return self._values.get(setting.lower(), default)
 
     def set_setting(self, setting, value):
-        self._values[setting.lower()] = values
+        self._values[setting.lower()] = value
 
 class RecorderDialog(QtGui.QDialog):
     def __init__(self, working_dir, parent=None):
@@ -53,8 +55,13 @@ class RecorderDialog(QtGui.QDialog):
         _ensure_parent_dir(self._temp_path)
         self._message_queue = Queue.Queue()
         self._recorder = recording.Recorder(self._temp_path, self)
-        self._uploader = uploading.Uploader(self, self._settings.get_setting('username', ''),
+        self._uploader = uploading.Uploader(self, self._settings.get_setting('host', _DEFAULT_HOST),
+                                            self._settings.get_setting('port', _DEFAULT_PORT),
+                                            self._settings.get_setting('username', ''),
                                             self._settings.get_setting('password', ''))
+
+        silence_level = int(self._settings.get_setting('threshold', 1500))
+        self._recorder.set_threshold(silence_level)
 
         self._error_to_display = None
         self._error_timer = QtCore.QTimer(self)
@@ -141,12 +148,14 @@ class RecorderDialog(QtGui.QDialog):
 
     def _download(self):
         try:
-            response = helpers.request_with_auth('/recordings/needed_words/',
+            response = helpers.request_with_auth(self._settings.get_setting('host', _DEFAULT_HOST),
+                                                 self._settings.get_setting('port', _DEFAULT_PORT),
+                                                 '/recordings/needed_words/',
                                                  self._settings.get_setting('username', ''),
                                                  self._settings.get_setting('password', ''))
             self._remaining_words = response.split('\n')
         except Exception, e:
-            self.on_error(str(e))
+            self.on_error(e.message)
 
         self._update_ui(True)
 
@@ -224,6 +233,8 @@ class RecorderDialog(QtGui.QDialog):
         msg = 'Silence calibration complete\nSound level: %i.' % silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
         self._recorder.set_threshold(silence_level)
+        self._settings.set_setting('threshold', str(silence_level))
+        self._settings.save()
         
     def _get_lame_path(self):
         if os.name == 'nt':
@@ -231,17 +242,83 @@ class RecorderDialog(QtGui.QDialog):
         else:
             return 'lame'
 
+class SettingsDialog(QtGui.QDialog):
+    def __init__(self, settings_path):
+        QtGui.QDialog.__init__(self, None)
+
+        self._settings_path = settings_path
+
+        username_layout = QtGui.QHBoxLayout()
+        username_label = QtGui.QLabel('Username:')
+        username_layout.addWidget(username_label)
+        self._username_edit = QtGui.QLineEdit()
+        self._username_edit.setMinimumWidth(200)
+        username_layout.addWidget(self._username_edit)
+
+        password_layout = QtGui.QHBoxLayout()
+        password_label = QtGui.QLabel('Password:')
+        password_layout.addWidget(password_label)
+        self._password_edit = QtGui.QLineEdit()
+        self._password_edit.setMinimumWidth(200)
+        password_layout.addWidget(self._password_edit)
+
+        buttons_layout = QtGui.QHBoxLayout()
+        buttons_layout.addStretch()
+        self._ok_button = QtGui.QPushButton('&OK')
+        self.connect(self._ok_button, QtCore.SIGNAL('clicked()'), self.accept)
+        buttons_layout.addWidget(self._ok_button)
+        self._cancel_button = QtGui.QPushButton('&Cancel')
+        self.connect(self._cancel_button, QtCore.SIGNAL('clicked()'), self.reject)
+        buttons_layout.addWidget(self._cancel_button)
+
+        self._full_layout = QtGui.QVBoxLayout()
+        self._full_layout.addLayout(username_layout)
+        self._full_layout.addLayout(password_layout)
+        self._full_layout.addLayout(buttons_layout)
+        self.setLayout(self._full_layout)
+
+
+    def accept(self):
+        username = str(self._username_edit.text())
+        password = str(self._password_edit.text())
+
+        try:
+            helpers.request_with_auth(_DEFAULT_HOST, _DEFAULT_PORT, '/test_auth/',
+                                      username, password)
+        except helpers.BadAuth, e:
+            QtGui.QMessageBox.critical(self, 'Invalid Credentials', str(e))
+        except Exception, e:
+            QtGui.QMessageBox.critical(self, 'Unknown Error', unicode(e.message))
+        else:
+            settings = Settings(self._settings_path)
+            settings.set_setting('username', username)
+            settings.set_setting('password', password)
+            settings.save()
+
+            QtGui.QDialog.accept(self)
+
 
 def _ensure_parent_dir(path):
     if not os.path.exists(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
+
+_DEFAULT_HOST = 'www.readbangla.com'
+_DEFAULT_PORT = '80'
 
 if __name__ == '__main__':
     if hasattr(sys, 'frozen'):
         working_dir = os.path.dirname(os.path.abspath(sys.executable))
     else:
         working_dir = os.path.dirname(os.path.abspath(__file__))
+
     app = QtGui.QApplication(sys.argv)
+
+    settings_path = os.path.join(working_dir, 'settings.ini')
+    if not os.path.exists(settings_path):
+        dlg = SettingsDialog(settings_path)
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            sys.exit(0)
+
     dlg = RecorderDialog(working_dir)
     dlg.show()
     sys.exit(dlg.exec_())
