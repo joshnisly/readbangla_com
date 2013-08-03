@@ -63,7 +63,7 @@ def download_needed(request):
 @login_required
 def audio_file(request, obj_id):
     recording = models.AudioRecording.objects.get(pk=obj_id)
-    audio_path = unicode(recording.audio)
+    audio_path = unicode(recording.audio).encode('utf8')
     body = open(audio_path, 'rb')
     response = HttpResponse(body, mimetype='audio/mpeg')
     response['Content-Length'] = os.path.getsize(audio_path)
