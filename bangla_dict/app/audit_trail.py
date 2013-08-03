@@ -8,7 +8,8 @@ import models
 import views.lookup
 
 def get_def_modify_entries(def_obj):
-    return models.AuditTrailEntry.objects.filter(object_id=def_obj.id, action='M').order_by('-id')
+    entries = models.AuditTrailEntry.objects.filter(object_id=def_obj.id, action='M', object_name='D')
+    return entries.order_by('-id')
 
 def format_audit_trail_entries(entries):
     change_dicts = []
@@ -72,6 +73,9 @@ def format_audit_trail_entries(entries):
 
     return change_dicts
 
+def record_user_word_lookup(user, word):
+    # TODO: this isn't right - do we track word object or word str?
+    models.UserLookupTrail.objects.create(user=user.get_profile(), word=word)
 
 def _format_timedelta(td):
     years = int(td.days / 365)
