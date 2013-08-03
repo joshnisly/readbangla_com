@@ -11,6 +11,7 @@ from app import audit_trail
 from app import models
 
 @csrf_exempt
+@helpers.report_errors_entrypoint
 @helpers.http_basic_auth
 def upload(request):
     assert request.user
@@ -35,6 +36,7 @@ def upload(request):
 
     return HttpResponse('success')
     
+@helpers.report_errors_entrypoint
 def download_needed(request):
     LIMIT = 100
     recently_added = models.AuditTrailEntry.objects.filter(object_name='W', action='A').order_by('-id')

@@ -72,6 +72,16 @@ def json_entrypoint(func):
         return HttpResponse(json_str, mimetype='text/javascript')
     return wrap
 
+def report_errors_entrypoint(func):
+    def wrap(request, *a, **kw):
+        try:
+            return func(request, *a, **kw)
+        except Exception, e:
+            res = HttpResponse(traceback.format_exc(), mimetype='text/plain')
+            res.status_code = 500
+            return res
+    return wrap
+
 def http_basic_auth(func):
     def wrap(request, *a, **kw):
         auth = request.META.get('HTTP_AUTHORIZATION')
