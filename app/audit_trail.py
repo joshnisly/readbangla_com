@@ -73,9 +73,8 @@ def format_audit_trail_entries(entries):
 
     return change_dicts
 
-def record_user_word_lookup(user, word):
-    # TODO: this isn't right - do we track word object or word str?
-    models.UserLookupTrail.objects.create(user=user.get_profile(), word=word)
+def record_user_word_lookup(user, word_str):
+    models.UserLookupTrail.objects.create(user=user.get_profile(), word=word_str)
 
 def _format_timedelta(td):
     years = int(td.days / 365)

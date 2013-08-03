@@ -82,6 +82,16 @@ class AudioRecording(models.Model):
 
 admin.site.register(AudioRecording)
 
+class UserLookupTrail(models.Model):
+    user = models.ForeignKey(UserProfile)
+    word = models.CharField(max_length=50)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return '%s viewed by %s on %s' % (self.word, self.user, self.date)
+
+admin.site.register(UserLookupTrail)
+
 class ExternalWord(models.Model):
     word = models.CharField(max_length=50, unique=True)
 
