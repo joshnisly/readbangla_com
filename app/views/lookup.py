@@ -60,20 +60,20 @@ def _get_ajax_json_for_word_or_phrase(request, input_str):
 
     # We only track single word lookups.
     if request.user.is_authenticated():
-        audit_trail.record_user_word_lookup(request.user, input_str)
+        audit_trail.record_user_word_lookup(request.user, word)
 
     return _get_json_for_word(request, input_str)
 
-def _get_json_for_word(request, word_str):
-    word = word_str.strip()
+def _get_json_for_word(request, raw_word_str):
+    word = raw_word_str.strip()
     if word and word_helpers.is_ascii(word):
-        return _get_json_for_english_word(request, word_str)
+        return _get_json_for_english_word(request, raw_word_str)
 
     word = word_helpers.simple_correct_spelling(word)
     root_words = word_helpers.get_possible_roots(word)
     result = {
-        'word': word_str,
-        'word_url': reverse(index, args=[word_str]),
+        'word': raw_word_str,
+        'word_url': reverse(index, args=[word]),
         'corrected_word': word,
         'dict_matches': [],
         'word_matches': [],

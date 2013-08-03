@@ -4,6 +4,7 @@ import re
 NO_PUNCTUATION_RE = re.compile('[|,;"\'-]')
 
 def simple_correct_spelling(word):
+    word = word.replace(u'\ufeff', '') # UTF8 BOM
     word = word.replace(u'\u0985\u09BE', u'\u0986')
     word = word.replace(u'\u09AF\u09BC', u'\u09DF')
     word = word.replace(u'\u09A1\u09BC', u'\u09DC')
