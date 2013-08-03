@@ -86,7 +86,7 @@ function createBanglaChart(parentElem)
         'z', 'r', 'l', 'sh,S', 'Sh', '\n',
         's', 'h', 'y,Y', 'R', 'Rh', '\n',
         '', '', '', '', '\n',
-        '``', 'ng', ':', '^', ',,', '\n',
+        't``', 'ng', ':', '^', ',,', '\n',
         'w', 'y,Z', 'r', 'rr', '\n',
         'kkh', 'NGg', 'gg', 'NGc', '\n'
     ];
