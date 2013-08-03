@@ -7,20 +7,22 @@
 <div class="Pane" style="padding: 0.5em">
     <div style="margin-top: 1em">
         <table><tr>
-            <td><input type="text" class="Bangla" id="BanglaWord" placeholder="&#x099C;&#x09DF; or joy" {% if word %}value="{{word}}"{% endif %}/></td>
+            <td><input type="text" class="Bangla" id="BanglaWord" placeholder="&#x09AC;&#x09BE;&#x09A1;&#x09BC;&#x09BF; or baRi" {% if word %}value="{{word}}"{% endif %}/></td>
             <td><button type="button" id="LookupBtn" class="LookupBtn invBtn invBtnPrimary">Lookup</button></td>
             <td>
-                <button type="button" id="ShowBanglaChartBtn" class="invBtn">?</button>
-                <div style="position: relative">
-                    <div id="BanglaChartPositioner">
-                        <div id="BanglaChartWrapper"></div>
-                    </div>
-                </div>
             </td>
             <td><img src="/static/throbber_large.gif" id="Throbber" style="display: none"/></td>
         </tr></table>
         <label class="RadioLabel {% if not is_english %}Checked{% endif %}"><input type="radio" name="Language"
-            value="Bangla" {% if not is_english %}checked="checked" {% endif %}/> Bangla</label>
+            value="Bangla" {% if not is_english %}checked="checked" {% endif %}/> Bangla
+            <span>
+                <button type="button" id="ShowBanglaChartBtn" class="invBtn">?</button>
+                <div style="position: relative; display: inline-block">
+                    <div id="BanglaChartPositioner">
+                        <div id="BanglaChartWrapper"></div>
+                    </div>
+                </div>
+            </span></label>
         <label class="RadioLabel {% if is_english %}Checked{% endif %}"><input type="radio" name="Language" id="EnglishRadio"
             value="English" {% if is_english %}checked="checked" {% endif %}/> English</label>
     </div>
