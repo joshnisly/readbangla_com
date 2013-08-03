@@ -68,7 +68,7 @@ class _RecordThread(threading.Thread):
                 # See if we need to stop
                 silent = self._is_silent(snd_data)
                 if silent:
-                    if self._num_audible > 15:
+                    if self._num_audible > 20:
                         self._num_silent += 1
                 else:
                     self._num_audible += 1
@@ -160,7 +160,6 @@ class _RecordThread(threading.Thread):
         return snd_data
 
     def _is_silent(self, snd_data):
-        print max(snd_data) < self._threshold, self._threshold
         return max(snd_data) < self._threshold
 
 class Recorder(object):
