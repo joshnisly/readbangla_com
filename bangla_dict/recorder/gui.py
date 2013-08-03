@@ -233,7 +233,7 @@ class RecorderDialog(QtGui.QDialog):
         msg = 'Silence calibration complete\nSound level: %i.' % silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
         self._recorder.set_threshold(silence_level)
-        self._settings.set_setting('threshold', str(silence_level))
+        self._settings.set_setting('threshold', str(int(silence_level)))
         self._settings.save()
         
     def _get_lame_path(self):

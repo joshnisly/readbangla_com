@@ -45,11 +45,8 @@ class _UploadThread(threading.Thread):
                                                  self._username, self._password,
                                                  query_parms=query_parms, post_data=body)
         except Exception, e:
-            print 'error'
-            print e
-            #open('error.txt', 'wb').write(
             self._parent.on_error(unicode(e.message))
-            self._message_queue.put(file_path)
+            self._message_queue.put((file_path, word_str))
             return
 
         os.unlink(file_path)
@@ -58,7 +55,7 @@ class _UploadThread(threading.Thread):
 class Uploader(object):
     def __init__(self, parent, host, port, username, password):
         self._message_queue = Queue.Queue()
-        self._upload_thread = _UploadThread(self._message_queue, host, port, parent, username, password)
+        self._upload_thread = _UploadThread(self._message_queue, parent, host, port, username, password)
         self._upload_thread.start()
 
     def add_item(self, file_path, word_str):
