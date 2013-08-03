@@ -9,6 +9,7 @@ import json
 
 import entry
 import helpers
+import recordings
 import words
 
 from app import audit_trail
@@ -77,7 +78,7 @@ def _get_json_for_word(request, raw_word_str):
         'corrected_word': word,
         'dict_matches': [],
         'word_matches': [],
-        'is_english': False
+        'is_english': False,
     }
     for root in [word] + root_words:
         match = helpers.get_first_or_none(models.Word, word=root)
@@ -89,6 +90,7 @@ def _get_json_for_word(request, raw_word_str):
                 'samsad_url': helpers.get_samsad_url_for_word_obj(match),
                 'edit_samsad_url': reverse(entry.edit_samsad_url, args=[match.word]),
                 'add_def_url': reverse(entry.enter_definition, args=[match.word]),
+                'audio_links': [reverse(recordings.audio_file, args=[x.id]) for x in match.audiorecording_set.all()]
             })
         else:
             match = helpers.get_first_or_none(models.ExternalWord, word=root)

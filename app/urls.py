@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     (r'^words/recently_added/$', app.views.words.recently_added),
     (r'^words/lookup/$', app.views.lookup.index),
     (r'^words/random/$', app.views.words.random),
+    (r'^recordings/file/(\d+)/$', app.views.recordings.audio_file),
 
     (r'^test_auth/$', app.views.home.test_auth),
 

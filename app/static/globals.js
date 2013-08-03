@@ -29,6 +29,11 @@
     });
 })();
 
+function isAuthenticated()
+{
+    return document.body.className.indexOf('Authenticated') != -1;
+}
+
 function isBanglaChar(char)
 {
     return char >= '\u0981' && char <= '\u09FF';
@@ -114,3 +119,4 @@ function createBanglaChart(parentElem)
             cell.html('&nbsp;');
     }
 }
+

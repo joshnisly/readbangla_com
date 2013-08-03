@@ -53,6 +53,50 @@ function createDefSection(word, parent)
         var editSamsadLink = titleElem.appendNewChild('A', '', 'EditSamsadLink');
         editSamsadLink.text('(edit)')
         editSamsadLink.attr('href', word.edit_samsad_url);
+
+        if (word.audio_links && word.audio_links.length)
+        {
+            if (isAuthenticated())
+            {
+                for (var i = 0; i < word.audio_links.length; i++)
+                {
+                    var audioDiv = titleElem.appendNewChild('DIV', '', 'AudioWrapper')
+                                            .css('display', 'inline-block');
+                    var audioTag = document.createElement('audio');
+                    var canPlay = audioTag.canPlayType && audioTag.canPlayType('audio/mpeg');
+                    if (canPlay)
+                    {
+                        var audioIcon = audioDiv.appendNewChild('IMG', '', 'AudioIcon');
+                        // Icon from https://www.iconfinder.com/icondetails/103711/32/louder_speaker_icon
+                        audioIcon.attr('src', '/static/speaker.png');
+                        audioIcon.css({
+                            'height': '20px',
+                            'margin-left': '10px'
+                        });
+                        audioIcon.attr('xurl', word.audio_links[i]);
+                        var audioElem = audioDiv.appendNewChild('AUDIO');
+                        audioElem.attr('src', word.audio_links[i]);
+                        audioElem.attr('type', 'audio/mpeg');
+                    }
+                    else
+                    {
+                        // Fall back to using Flash.
+                        var audioID = word.word + i;
+                        var flashWrapper = audioDiv.appendNewChild('SPAN', audioID);
+                        audioDiv.css('margin-left', '10px');
+                        AudioPlayer.embed(audioID, {soundFile: word.audio_links[i]});
+                    }
+                }
+            }
+            else
+            {
+                var textElem = titleElem.appendNewChild('SPAN').text('(Log in to listen to recordings of this word.)');
+                textElem.css({
+                    'font-size': '10px',
+                    'margin-left': '10px'
+                });
+            }
+        }
     }
     if (word.defs)
     {
@@ -303,6 +347,12 @@ $(document).ready(function() {
             target.closest('.WordDefWrapper').find('.EditsWrapper').toggle();
             return;
         }
+
+        if (target.hasClass('AudioIcon'))
+        {
+            $(event.target).closest('.AudioWrapper').find('AUDIO')[0].play();
+            return;
+        };
     });
 
     $('#LookupBtn').bind('click', doAjaxLookup);
