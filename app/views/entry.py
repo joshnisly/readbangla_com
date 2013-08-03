@@ -74,13 +74,14 @@ class _DefinitionForm(forms.Form):
                                      initial='N')
     english_word = forms.CharField(max_length=50, widget=forms.TextInput(attrs={
                       'title': 'Multiple words can be entered comma-separated',
-                      'placeholder': 'e.g. house,home,dwelling'
+                      'placeholder': 'e.g. home'
                   }))
     definition = forms.CharField(required=False, widget=forms.Textarea(attrs={
-                      'placeholder': '(Optional)'
+                      'placeholder': '(Optional) e.g. house, home, dwelling'
                   }))
     notes = forms.CharField(required=False, widget=forms.Textarea(attrs={
-                      'placeholder': '(Optional)'
+                      'placeholder': u'(Optional) e.g. Typically used for '+\
+                                     u'a permanent home. See also \u09AC\u09BE\u09B8\u09BE.'
                   }))
 
 def _run_edit_def_entrypoint(request, word_str, def_obj=None):
@@ -109,9 +110,11 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
         definition_form = _DefinitionForm(request.POST)
         if definition_form.is_valid():
             word = helpers.get_first_or_none(models.Word, word=word_str)
+            is_new_word = False
             if not word:
                 word = models.Word.objects.create(word=word_str, added_by=request.user.get_profile())
                 db_helpers.add_audit_trail_entry(None, word, request.user.get_profile())
+                is_new_word = True
             def_data = definition_form.cleaned_data
             def_args = {
                 'part_of_speech': def_data['part_of_speech'],
@@ -132,8 +135,11 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
                                                            **def_args)
                 db_helpers.add_audit_trail_entry(None, new_def, request.user.get_profile())
 
-            return HttpResponseRedirect(reverse(lookup.index,
-                                                args=[word.word]))
+            # If this is the first definition for the word, redirect to the Edit Samsad page.
+            if is_new_word:
+                return HttpResponseRedirect(reverse(edit_samsad_url, args=[word.word]))
+            else:
+                return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
 
     existing_defs = []
     word = helpers.get_first_or_none(models.Word, word=word_str)
@@ -141,6 +147,7 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
         existing_defs = list(word.definitions.all())
         if def_obj:
             existing_defs = filter(lambda x: x.id != def_obj.id, existing_defs)
+
     return helpers.run_template(request, 'entry__enter_new_word', {
         'definition_form': definition_form,
         'word_str': word_str,
