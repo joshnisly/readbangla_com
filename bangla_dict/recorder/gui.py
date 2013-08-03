@@ -51,7 +51,7 @@ class RecorderDialog(QtGui.QDialog):
 
         self._settings = Settings(os.path.join(self._working_dir, 'settings.ini'))
 
-        self._temp_path = os.path.join(self._working_dir, 'temp', 'testing.wav')
+        self._temp_path = os.path.join(self._working_dir, 'temp', 'working.wav')
         _ensure_parent_dir(self._temp_path)
         self._message_queue = Queue.Queue()
         self._recorder = recording.Recorder(self._temp_path, self)
@@ -60,8 +60,8 @@ class RecorderDialog(QtGui.QDialog):
                                             self._settings.get_setting('username', ''),
                                             self._settings.get_setting('password', ''))
 
-        silence_level = int(self._settings.get_setting('threshold', 1500))
-        self._recorder.set_threshold(silence_level)
+        self._silence_level = int(self._settings.get_setting('threshold', 0))
+        self._recorder.set_threshold(self._silence_level)
 
         self._error_to_display = None
         self._error_timer = QtCore.QTimer(self)
@@ -186,6 +186,10 @@ class RecorderDialog(QtGui.QDialog):
             self._play_button.setText('&Play')
 
     def _start_stop_recording(self):
+        if self._silence_level == 0:
+            QtGui.QMessageBox.critical(self, 'Calibration required', 'You must calibrate the software before recording.')
+            return
+
         self._recorder.start_stop()
         self._update_ui()
 
@@ -229,11 +233,11 @@ class RecorderDialog(QtGui.QDialog):
         time.sleep(2)
         self._recorder.start_stop()
 
-        silence_level = self._recorder.get_90th_percentile() * 1.5
-        msg = 'Silence calibration complete\nSound level: %i.' % silence_level
+        self._silence_level = int(self._recorder.get_90th_percentile() * 1.5)
+        msg = 'Silence calibration complete\nSound level: %i.' % self._silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
-        self._recorder.set_threshold(silence_level)
-        self._settings.set_setting('threshold', str(int(silence_level)))
+        self._recorder.set_threshold(self._silence_level)
+        self._settings.set_setting('threshold', str(self._silence_level))
         self._settings.save()
         
     def _get_lame_path(self):
