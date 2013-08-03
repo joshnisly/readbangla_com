@@ -6,6 +6,9 @@ import urllib
 class BadAuth(Exception):
     pass
 
+class ServerError(Exception):
+    pass
+
 def request_with_auth(host, port, path, username, password, query_parms=None, post_data=None):
     conn = httplib.HTTPConnection(host, int(port))
     headers = {}
@@ -20,6 +23,8 @@ def request_with_auth(host, port, path, username, password, query_parms=None, po
 
     conn.request('POST' if post_data else 'GET', path, body=post_data, headers=headers)
     response = conn.getresponse()
+    if response.status == 500:
+        raise ServerError, 'Server error: ' + response.read().decode('utf8')
     if response.status == 401:
         raise BadAuth, 'Invalid username or password.'
     if response.status != 200:

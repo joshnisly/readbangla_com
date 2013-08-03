@@ -130,6 +130,13 @@ class RecorderDialog(QtGui.QDialog):
 
         self._download() # TODO: remove this after testing
 
+        # Queue un-uploaded files
+        outbox_path = os.path.join(self._working_dir, 'outbox')
+        for entry in os.listdir(outbox_path):
+            entry = unicode(entry, 'utf8')
+            word = os.path.splitext(entry)[0]
+            self._uploader.add_item(os.path.join(outbox_path, entry), word)
+
     def reject(self):
         self._recorder.quit()
         self._uploader.quit()
@@ -194,6 +201,10 @@ class RecorderDialog(QtGui.QDialog):
         self._update_ui()
 
     def _play_back(self):
+        if not os.path.exists(self._temp_path):
+            QtGui.QMessageBox.critical(self, 'Error', 'Please record a word first.')
+            return
+
         self._is_playing = True
         self._update_ui()
         play.play_wav(self._temp_path)
@@ -202,6 +213,10 @@ class RecorderDialog(QtGui.QDialog):
 
     def _convert_and_upload(self):
         try:
+            if not os.path.exists(self._temp_path):
+                QtGui.QMessageBox.critical(self, 'Error', 'Please record a word before uploading.')
+                return
+
             cur_word = self._get_cur_word()
 
             # Convert to MP3
@@ -213,6 +228,10 @@ class RecorderDialog(QtGui.QDialog):
             os.rename(self._temp_path + '.mp3', target_path)
 
             self._uploader.add_item(target_path, cur_word)
+
+            os.unlink(self._temp_path)
+            self._remaining_words = self._remaining_words[1:]
+            self._update_ui(True)
         except Exception, e:
             self.on_error(str(e))
 
@@ -233,7 +252,7 @@ class RecorderDialog(QtGui.QDialog):
         time.sleep(2)
         self._recorder.start_stop()
 
-        self._silence_level = int(self._recorder.get_90th_percentile() * 1.5)
+        self._silence_level = int(self._recorder.get_90th_percentile() * 1.1)
         msg = 'Silence calibration complete\nSound level: %i.' % self._silence_level
         response = QtGui.QMessageBox.information(self, 'Calibration, part 1', msg)
         self._recorder.set_threshold(self._silence_level)

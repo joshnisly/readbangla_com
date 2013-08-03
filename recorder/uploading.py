@@ -31,6 +31,7 @@ class _UploadThread(threading.Thread):
                 self._upload_file(file_path, word_str)
                 time.sleep(1)
         except Exception, e:
+            print e
             text = unicode(e.message)
             self._parent.on_error(text)
 
@@ -44,7 +45,12 @@ class _UploadThread(threading.Thread):
             response = helpers.request_with_auth(self._host, self._port, PATH,
                                                  self._username, self._password,
                                                  query_parms=query_parms, post_data=body)
+        except helpers.ServerError, e:
+            print e
+            self._parent.on_error(unicode(e.message))
+            return
         except Exception, e:
+            print e
             self._parent.on_error(unicode(e.message))
             self._message_queue.put((file_path, word_str))
             return
