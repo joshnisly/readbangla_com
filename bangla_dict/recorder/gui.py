@@ -135,11 +135,13 @@ class RecorderDialog(QtGui.QDialog):
         self._download() # TODO: remove this after testing
 
         # Queue un-uploaded files
-        outbox_path = os.path.join(self._working_dir, 'outbox')
-        for entry in os.listdir(outbox_path):
-            entry = unicode(entry, 'utf8')
-            word = os.path.splitext(entry)[0]
-            self._uploader.add_item(os.path.join(outbox_path, entry), word)
+        outbox_path = unicode(os.path.join(self._working_dir, 'outbox'))
+        if os.path.exists(outbox_path):
+            for entry in os.listdir(outbox_path):
+                if not isinstance(entry, unicode):
+                    entry = unicode(entry, 'utf8')
+                word = os.path.splitext(entry)[0]
+                self._uploader.add_item(os.path.join(outbox_path, entry), word)
 
     def reject(self):
         self._recorder.quit()

@@ -46,6 +46,7 @@ class _UploadThread(threading.Thread):
             response = helpers.request_with_auth(self._host, self._port, PATH,
                                                  self._username, self._password,
                                                  query_parms=query_parms, post_data=body)
+            body.close()
             self._parent.on_status_update('Ready.')
         except helpers.ServerError, e:
             self._parent.on_status_update('Server error.')
