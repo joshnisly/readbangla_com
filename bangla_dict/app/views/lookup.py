@@ -58,6 +58,10 @@ def _get_ajax_json_for_word_or_phrase(request, input_str):
 
         return result
 
+    # We only track single word lookups.
+    if request.user.is_authenticated():
+        audit_trail.record_user_word_lookup(request.user, input_str)
+
     return _get_json_for_word(request, input_str)
 
 def _get_json_for_word(request, word_str):
