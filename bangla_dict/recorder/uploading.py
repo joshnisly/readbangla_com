@@ -42,14 +42,18 @@ class _UploadThread(threading.Thread):
             query_parms = {
                 'word': word_str.encode('utf8')
             }
+            self._parent.on_status_update(u'Uploading %s...' % word_str)
             response = helpers.request_with_auth(self._host, self._port, PATH,
                                                  self._username, self._password,
                                                  query_parms=query_parms, post_data=body)
+            self._parent.on_status_update('Ready.')
         except helpers.ServerError, e:
+            self._parent.on_status_update('Server error.')
             print e
             self._parent.on_error(unicode(e.message))
             return
         except Exception, e:
+            self._parent.on_status_update('Error.')
             print e
             self._parent.on_error(unicode(e.message))
             self._message_queue.put((file_path, word_str))
@@ -60,7 +64,7 @@ class _UploadThread(threading.Thread):
 
 class Uploader(object):
     def __init__(self, parent, host, port, username, password):
-        self._message_queue = Queue.Queue()
+        self._message_queue = Queue.LifoQueue()
         self._upload_thread = _UploadThread(self._message_queue, parent, host, port, username, password)
         self._upload_thread.start()
 
