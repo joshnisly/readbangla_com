@@ -131,3 +131,8 @@
     padding: 0.35em 0.45em;
     line-height: 1.25em;
 }
+
+.AudioIcon
+{
+    cursor: pointer;
+}

@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
@@ -29,7 +30,12 @@ def upload(request):
     if not os.path.exists(os.path.dirname(full_path)):
         os.makedirs(os.path.dirname(full_path))
     with open(full_path, 'wb') as output:
-        output.write(full_path)
+        if hasattr(request, 'body'):
+            body = request.body
+        else:
+            body = request.raw_post_data
+
+        output.write(body)
 
     recording = models.AudioRecording(word=word_obj, audio=full_path, added_by=request.user.get_profile())
     recording.save()
@@ -53,3 +59,12 @@ def download_needed(request):
 
     words = [x.word for x in words]
     return HttpResponse('\n'.join(words), mimetype='text/plain')
+
+@login_required
+def audio_file(request, obj_id):
+    recording = models.AudioRecording.objects.get(pk=obj_id)
+    audio_path = unicode(recording.audio)
+    body = open(audio_path, 'rb')
+    response = HttpResponse(body, mimetype='audio/mpeg')
+    response['Content-Length'] = os.path.getsize(audio_path)
+    return response
