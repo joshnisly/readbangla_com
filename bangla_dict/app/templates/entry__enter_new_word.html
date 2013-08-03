@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if word_str %}Enter definition{% else %}Enter New Word{% endif %}{% endblock %}
+{% block title %}{% if word_str %}Edit {{word_str}}{% else %}Enter New Word{% endif %}{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="/static/entry.css"/>

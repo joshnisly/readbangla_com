@@ -184,9 +184,9 @@ function handleResults(result)
         result.word_url != window.location.pathname &&
         result.word_url.length < 100)
     {
-        window.History.pushState(result, 'Lookup results for ' + result.corrected_word, result.word_url);
+        window.History.pushState(result, result.corrected_word + ' - ReadBangla.com', result.word_url);
     }
-    document.title = 'Lookup results for ' + result.corrected_word;
+    document.title = result.corrected_word + ' - ReadBangla.com';
     $('#BanglaWord').val(result.corrected_word);
 
     var resultsElem = $('#Results');
