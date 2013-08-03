@@ -64,6 +64,7 @@ class RecorderDialog(QtGui.QDialog):
         self._recorder.set_threshold(self._silence_level)
 
         self._error_to_display = None
+        self._status_text = None
         self._error_timer = QtCore.QTimer(self)
         self.connect(self._error_timer, QtCore.SIGNAL('timeout()'), self._display_error)
         self._error_timer.start(100)
@@ -114,6 +115,9 @@ class RecorderDialog(QtGui.QDialog):
         self.connect(self._upload_button, QtCore.SIGNAL('clicked()'), self._convert_and_upload)
         recording_layout.addWidget(self._upload_button)
 
+        self._status_label = QtGui.QLabel('Ready.')
+        full_layout.addWidget(self._status_label)
+
         for button in [self._record_button, self._play_button, self._upload_button]:
             font = button.font()
             font.setPointSize(15)
@@ -145,11 +149,18 @@ class RecorderDialog(QtGui.QDialog):
     def on_error(self, error):
         self._error_to_display = error
 
+    def on_status_update(self, status):
+        self._status_text = status
+
     def _display_error(self):
         if self._error_to_display:
             QtGui.QMessageBox.critical(self, 'Error', self._error_to_display)
             self._error_to_display = None
-        
+
+        if self._status_text:
+            self._status_label.setText(self._status_text)
+            self._status_text = None
+
     def on_recording_finish(self):
         self._update_ui()
 
