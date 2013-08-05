@@ -296,6 +296,7 @@ class SettingsDialog(QtGui.QDialog):
         password_layout.addWidget(password_label)
         self._password_edit = QtGui.QLineEdit()
         self._password_edit.setMinimumWidth(200)
+        self._password_edit.setEchoMode(QtGui.QLineEdit.Password)
         password_layout.addWidget(self._password_edit)
 
         buttons_layout = QtGui.QHBoxLayout()
