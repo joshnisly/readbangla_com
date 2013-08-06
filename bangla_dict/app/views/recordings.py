@@ -25,19 +25,45 @@ def upload(request):
 
     random_chars = ''.join(random.sample(string.letters+string.digits, 8))
 
-    name = u'%s_%s.mp3' % (word, random_chars)
-    full_path = os.path.join(settings.PREFIX, 'audio_files', name.encode('utf8'))
-    if not os.path.exists(os.path.dirname(full_path)):
-        os.makedirs(os.path.dirname(full_path))
-    with open(full_path, 'wb') as output:
+    AUDIO_DIR = os.path.join(settings.PREFIX, 'audio_files')
+    TEMP_WAV_PATH = os.path.join(AUDIO_DIR, 'wav', random_chars + '.wav')
+    TEMP_MP3_PATH = os.path.join(AUDIO_DIR, 'mp3', random_chars + '.mp3')
+    TEMP_OGG_PATH = os.path.join(AUDIO_DIR, 'ogg', random_chars + '.ogg')
+
+    for path in [TEMP_WAV_PATH, TEMP_MP3_PATH, TEMP_OGG_PATH]:
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+
+    # WAV file
+    with open(TEMP_WAV_PATH, 'wb') as output:
         if hasattr(request, 'body'):
             body = request.body
         else:
             body = request.raw_post_data
 
+        # Terrible hack to work around bugs in Django's standalone server.
+        body = body.lstrip('\r\n')
         output.write(body)
 
-    recording = models.AudioRecording(word=word_obj, audio=full_path, added_by=request.user.get_profile())
+    # Convert to mp3
+    os.system(u'lame -mm -h %s %s' % (TEMP_WAV_PATH, TEMP_MP3_PATH))
+
+    # Convert to ogg
+    os.system(u'oggenc -q3 -C1 -o %s %s' % (TEMP_OGG_PATH, TEMP_WAV_PATH))
+
+    title = u'%s_%s' % (word, random_chars)
+    WAV_PATH = os.path.join(AUDIO_DIR, 'wav', title + '.wav')
+    os.rename(TEMP_WAV_PATH, WAV_PATH)
+    MP3_PATH = os.path.join(AUDIO_DIR, 'mp3', title + '.mp3')
+    os.rename(TEMP_MP3_PATH, MP3_PATH)
+    OGG_PATH = os.path.join(AUDIO_DIR, 'ogg', title + '.ogg')
+    os.rename(TEMP_OGG_PATH, OGG_PATH)
+
+    recording = models.AudioRecording(word=word_obj,
+                                      wav=WAV_PATH,
+                                      mp3=MP3_PATH,
+                                      ogg=OGG_PATH,
+                                      added_by=request.user.get_profile())
     recording.save()
 
     return HttpResponse('success')

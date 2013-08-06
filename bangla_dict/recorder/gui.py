@@ -165,8 +165,7 @@ class RecorderDialog(QtGui.QDialog):
         # Queue un-uploaded files
         outbox_paths = self._get_outbox_paths()
         for word, path in outbox_paths:
-            word = os.path.splitext(os.path.basename(entry))[0]
-            self._uploader.add_item(os.path.join(outbox_path, entry), word)
+            self._uploader.add_item(path, word)
 
     def reject(self):
         self._recorder.quit()

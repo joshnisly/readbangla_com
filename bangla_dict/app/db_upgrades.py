@@ -46,18 +46,19 @@ class UpgradeError(Exception):
     pass
 
 class DatabaseUpgrader(object):
-    def __init__(self, db_name, app_name):
+    def __init__(self, db_name, app_name, hints_fn=None):
         self._conn = django.db.connection
         self._db_name = db_name
         self._app_name = app_name
+        self._hints_fn = hints_fn
 
         self._changes = None
 
     def get_changes(self):
         if self._changes is None:
             hints = _InternalUpgradeHints()
-            #TODO:if hasattr(self._new_schema, 'upgrade_hints'):
-            #    self._new_schema.upgrade_hints(hints)
+            if self._hints_fn:
+                self._hints_fn(hints)
             db_def = self._build_def_from_sql()
             new_def = self._build_def_from_models()
             self._changes = self._calc_changes(db_def, new_def,
@@ -505,7 +506,10 @@ if __name__ == '__main__':
 
     import json
 
-    upgrader = DatabaseUpgrader('bangla_dict', 'app')
+    def upgrade_hints(hints):
+        hints.rename_column('app_audiorecording', 'audio', 'wav')
+        pass
+    upgrader = DatabaseUpgrader('bangla_dict', 'app', upgrade_hints)
 
     if upgrader.get_changes():
         print json.dumps(upgrader.get_changes(), indent=3)
