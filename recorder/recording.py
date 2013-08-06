@@ -10,18 +10,18 @@ import sys
 import time
 import wave
 
+import worker_thread
+
 THRESHOLD = 1500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
 RATE = 44100
 MAXIMUM = 16384
 
-class _RecordThread(threading.Thread):
+class _RecordThread(worker_thread.WorkerThread):
     def __init__(self, output_path, message_queue, parent):
-        threading.Thread.__init__(self)
+        worker_thread.WorkerThread.__init__(self, message_queue, parent)
         self._output_path = output_path
-        self._message_queue = message_queue
-        self._parent = parent
 
         self._pyaudio = pyaudio.PyAudio()
         self._is_recording = False
@@ -35,50 +35,40 @@ class _RecordThread(threading.Thread):
     def __del__(self):
         self._pyaudio.terminate()
 
-    def run(self):
-        while True:
-            event = None
-            timeout = 0 if self._is_recording else 0.1
-            try:
-                event = self._message_queue.get(timeout=timeout)
-            except Queue.Empty:
-                pass
+    def _get_timeout(self):
+        return 0 if self._is_recording else 0.1
+
+    def _process_event(self, event):
+        if event == 'start':
+            self._should_normalize = True
+            self._start()
+
+        if event == 'startnonormalize':
+            self._should_normalize = False
+            self._start()
+
+        if event == 'stop':
+            self._finish()
+
+        if self._stream:
+            snd_data = array.array('h', self._stream.read(CHUNK_SIZE))
+            if sys.byteorder == 'big':
+                snd_data.byteswap()
+
+            # See if we need to stop
+            silent = self._is_silent(snd_data)
+            if silent:
+                if self._num_audible > 20:
+                    self._num_silent += 1
             else:
-                if event is None:
-                    if self._is_recording:
-                        self._finish()
-                    break
+                self._num_audible += 1
+                self._num_silent = 0
 
-            if event == 'start':
-                self._should_normalize = True
-                self._start()
-
-            if event == 'startnonormalize':
-                self._should_normalize = False
-                self._start()
-
-            if event == 'stop':
+            if self._num_silent > 15 and self._should_normalize:
                 self._finish()
+                return
 
-            if self._stream:
-                snd_data = array.array('h', self._stream.read(CHUNK_SIZE))
-                if sys.byteorder == 'big':
-                    snd_data.byteswap()
-
-                # See if we need to stop
-                silent = self._is_silent(snd_data)
-                if silent:
-                    if self._num_audible > 20:
-                        self._num_silent += 1
-                else:
-                    self._num_audible += 1
-                    self._num_silent = 0
-
-                if self._num_silent > 15 and self._should_normalize:
-                    self._finish()
-                    continue
-
-                self._audio.extend(snd_data)
+            self._audio.extend(snd_data)
 
     def is_recording(self):
         return self._is_recording
@@ -126,7 +116,8 @@ class _RecordThread(threading.Thread):
         self._is_recording = False
         self._num_audible = 0
         self._num_silent = 0
-        self._parent.on_recording_finish()
+        if self._should_normalize:
+            self._parent.on_recording_finish()
 
     def _normalize(self, snd_data):
         adjustment_factor = float(MAXIMUM)/max(abs(i) for i in snd_data)
