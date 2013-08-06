@@ -44,7 +44,7 @@ def dump_db(request):
     MYSQL_USERNAME = db['USER']
     MYSQL_PASSWORD = db['PASSWORD']
 
-    command = 'mysqldump -u %s -p%s %s | gzip -9 > "%s"' % \
+    command = 'mysqldump -u %s -p%s --add-drop-database --databases %s | gzip -9 > "%s"' % \
                 (MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DB, temp_file.name)
     os.system(command)
     # save your data to newfile.name
