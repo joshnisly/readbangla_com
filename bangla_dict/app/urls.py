@@ -16,8 +16,8 @@ urlpatterns = patterns('',
     (r'^words/random/$', app.views.words.random),
     (r'^recordings/file/(\d+)/$', app.views.recordings.audio_file),
 
-    (r'^dump/$', app.views.home.dump_db),
-
+    (r'^words/browse/$', app.views.words.browse),
+    (r'^words/browse/(.+)/$', app.views.words.browse),
 
     # Entry
     (r'^entry/new_def/(.+)/$', app.views.entry.enter_definition), # This url is referenced in JS.
@@ -42,4 +42,6 @@ urlpatterns = patterns('',
     (r'^recordings/upload/$', app.views.recordings.upload),
     (r'^recordings/needed_words/$', app.views.recordings.download_needed),
     (r'^test_auth/$', app.views.home.test_auth),
+
+    (r'^dump/$', app.views.home.dump_db),
 )
