@@ -46,6 +46,7 @@ class RecorderDialog(QtGui.QDialog):
 
         self._is_playing = False
         self._working_dir = working_dir
+        self._warn_on_list_change = True
 
         self._remaining_words = []
 
@@ -94,10 +95,10 @@ class RecorderDialog(QtGui.QDialog):
         middle_layout.addStretch()
         full_layout.addLayout(middle_layout)
 
-        self.connect(self._words_list.selectionModel(), QtCore.SIGNAL('currentChanged(const QModelIndex&, const QModelIndex&)'), self._on_word_selected)
+        self._words_list.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
 
         recording_layout = QtGui.QVBoxLayout()
-        recording_layout.setSpacing(20)
+        recording_layout.setSpacing(10)
         recording_layout.setAlignment(QtCore.Qt.AlignHCenter)
         self._cur_word_label = QtGui.QLabel()
         font = self._cur_word_label.font()
@@ -105,25 +106,51 @@ class RecorderDialog(QtGui.QDialog):
         self._cur_word_label.setFont(font)
         self._cur_word_label.setAlignment(QtCore.Qt.AlignHCenter)
         recording_layout.addWidget(self._cur_word_label)
-        self._record_button = QtGui.QPushButton('&Record')
+
+        record_play_layout = QtGui.QHBoxLayout()
+        self._record_button = QtGui.QToolButton(self)
+        self._record_button.setIcon(QtGui.QIcon('Media-record.svg'))
+        self._record_button.setIconSize(QtCore.QSize(80, 80))
+        self._record_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self._record_button.setMinimumWidth(180)
         self.connect(self._record_button, QtCore.SIGNAL('clicked()'), self._start_stop_recording)
-        recording_layout.addWidget(self._record_button)
-        self._play_button = QtGui.QPushButton('&Play')
+        record_play_layout.addWidget(self._record_button)
+
+        self._play_button = QtGui.QToolButton(self)
+        self._play_button.setIcon(QtGui.QIcon('Media-playback-start.svg'))
+        self._play_button.setIconSize(QtCore.QSize(80, 80))
         self.connect(self._play_button, QtCore.SIGNAL('clicked()'), self._play_back)
-        recording_layout.addWidget(self._play_button)
-        self._upload_button = QtGui.QPushButton('&Upload file')
+        record_play_layout.addWidget(self._play_button)
+
+        record_play_layout.setStretch(0, 3)
+        record_play_layout.setStretch(1, 1)
+        recording_layout.addLayout(record_play_layout)
+
+        upload_skip_layout = QtGui.QHBoxLayout()
+        self._upload_button = QtGui.QToolButton(self)
+        self._upload_button.setIcon(QtGui.QIcon('Document-save-as.svg'))
+        self._upload_button.setIconSize(QtCore.QSize(60, 60))
+        self._upload_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self._upload_button.setText('&Upload')
         self.connect(self._upload_button, QtCore.SIGNAL('clicked()'), self._convert_and_upload)
-        recording_layout.addWidget(self._upload_button)
+        upload_skip_layout.addWidget(self._upload_button)
+
+        self._skip_button = QtGui.QToolButton(self)
+        self._skip_button.setIcon(QtGui.QIcon('RedX.svg'))
+        self._skip_button.setIconSize(QtCore.QSize(60, 60))
+        self._skip_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self._skip_button.setText('S&kip')
+        self.connect(self._skip_button, QtCore.SIGNAL('clicked()'), self._skip_word)
+        upload_skip_layout.addWidget(self._skip_button)
+        recording_layout.addLayout(upload_skip_layout)
 
         self._status_label = QtGui.QLabel('Ready.')
         full_layout.addWidget(self._status_label)
 
-        for button in [self._record_button, self._play_button, self._upload_button]:
+        for button in [self._record_button, self._play_button, self._upload_button, self._skip_button]:
             font = button.font()
             font.setPointSize(15)
             button.setFont(font)
-            button.setStyleSheet('padding: 20;')
-            button.setMinimumWidth(250)
 
         recording_layout.addStretch()
         middle_layout.addLayout(recording_layout)
@@ -135,13 +162,10 @@ class RecorderDialog(QtGui.QDialog):
         self._download() # TODO: remove this after testing
 
         # Queue un-uploaded files
-        outbox_path = unicode(os.path.join(self._working_dir, 'outbox'))
-        if os.path.exists(outbox_path):
-            for entry in os.listdir(outbox_path):
-                if not isinstance(entry, unicode):
-                    entry = unicode(entry, 'utf8')
-                word = os.path.splitext(entry)[0]
-                self._uploader.add_item(os.path.join(outbox_path, entry), word)
+        outbox_paths = self._get_outbox_paths()
+        for word, path in outbox_paths:
+            word = os.path.splitext(os.path.basename(entry))[0]
+            self._uploader.add_item(os.path.join(outbox_path, entry), word)
 
     def reject(self):
         self._recorder.quit()
@@ -153,6 +177,17 @@ class RecorderDialog(QtGui.QDialog):
 
     def on_status_update(self, status):
         self._status_text = status
+
+    def _get_outbox_paths(self):
+        paths = []
+        outbox_path = unicode(os.path.join(self._working_dir, 'outbox'))
+        if os.path.exists(outbox_path):
+            for entry in os.listdir(outbox_path):
+                if not isinstance(entry, unicode):
+                    entry = unicode(entry, 'utf8')
+                word = os.path.splitext(entry)[0]
+                paths.append((word, os.path.join(outbox_path, entry)))
+        return paths
 
     def _display_error(self):
         if self._error_to_display:
@@ -174,6 +209,10 @@ class RecorderDialog(QtGui.QDialog):
                                                  self._settings.get_setting('username', ''),
                                                  self._settings.get_setting('password', ''))
             self._remaining_words = response.split('\n')
+            outbox_paths = self._get_outbox_paths()
+            for word, ignored_path in outbox_paths:
+                if word in self._remaining_words:
+                    self._remaining_words.remove(word)
         except Exception, e:
             self.on_error(e.message)
 
@@ -199,11 +238,6 @@ class RecorderDialog(QtGui.QDialog):
         self._record_button.setText(text)
         self._record_button.setCheckable(True)
         self._record_button.setChecked(self._recorder.is_recording())
-
-        if self._is_playing:
-            self._play_button.setText('&Playing...')
-        else:
-            self._play_button.setText('&Play')
 
     def _start_stop_recording(self):
         if self._silence_level == 0:
@@ -232,24 +266,20 @@ class RecorderDialog(QtGui.QDialog):
 
             cur_word = self._get_cur_word()
 
-            # Convert to MP3
-            lame_path = self._get_lame_path()
-            os.system(u'%s -mm -h %s %s' % (lame_path, self._temp_path, self._temp_path + '.mp3'))
-
-            target_path = os.path.join(self._working_dir, 'outbox', cur_word + '.mp3')
+            target_path = os.path.join(self._working_dir, 'outbox', cur_word + '.wav')
             _ensure_parent_dir(target_path)
-            os.rename(self._temp_path + '.mp3', target_path)
+            os.rename(self._temp_path, target_path)
 
             self._uploader.add_item(target_path, cur_word)
 
-            os.unlink(self._temp_path)
-            self._remaining_words = self._remaining_words[1:]
+            self._remaining_words.remove(cur_word)
             self._update_ui(True)
         except Exception, e:
             self.on_error(str(e))
 
-    def _on_word_selected(self, index, old_index):
-        self._update_ui()
+    def _skip_word(self):
+        self._remaining_words = self._remaining_words[1:]
+        self._update_ui(True)
 
     def _calibrate(self):
         assert not self._recorder.is_recording()
@@ -272,11 +302,6 @@ class RecorderDialog(QtGui.QDialog):
         self._settings.set_setting('threshold', str(self._silence_level))
         self._settings.save()
         
-    def _get_lame_path(self):
-        if os.name == 'nt':
-            return os.path.join(self._working_dir, 'lame.exe')
-        else:
-            return 'lame'
 
 class SettingsDialog(QtGui.QDialog):
     def __init__(self, settings_path):
