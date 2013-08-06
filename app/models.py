@@ -72,7 +72,9 @@ admin.site.register(Definition)
 
 class AudioRecording(models.Model):
     word = models.ForeignKey(Word)
-    audio = models.FileField(upload_to='audio')
+    wav = models.FileField(upload_to='audio/wav', max_length=256)
+    mp3 = models.FileField(upload_to='audio/mp3', max_length=256)
+    ogg = models.FileField(upload_to='audio/ogg', max_length=256)
 
     added_by = models.ForeignKey(UserProfile)
     added_on = models.DateTimeField(auto_now_add=True)
