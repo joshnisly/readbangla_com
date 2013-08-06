@@ -110,7 +110,7 @@ class RecorderDialog(QtGui.QDialog):
 
         record_play_layout = QtGui.QHBoxLayout()
         self._record_button = QtGui.QToolButton(self)
-        self._record_button.setIcon(QtGui.QIcon('Media-record.svg'))
+        self._record_button.setIcon(QtGui.QIcon(os.path.join(self._working_dir, 'Media-record.svg')))
         self._record_button.setIconSize(QtCore.QSize(80, 80))
         self._record_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self._record_button.setMinimumWidth(180)
@@ -118,7 +118,7 @@ class RecorderDialog(QtGui.QDialog):
         record_play_layout.addWidget(self._record_button)
 
         self._play_button = QtGui.QToolButton(self)
-        self._play_button.setIcon(QtGui.QIcon('Media-playback-start.svg'))
+        self._play_button.setIcon(QtGui.QIcon(os.path.join(self._working_dir, 'Media-playback-start.svg')))
         self._play_button.setIconSize(QtCore.QSize(80, 80))
         self.connect(self._play_button, QtCore.SIGNAL('clicked()'), self._play_back)
         record_play_layout.addWidget(self._play_button)
@@ -129,7 +129,7 @@ class RecorderDialog(QtGui.QDialog):
 
         upload_skip_layout = QtGui.QHBoxLayout()
         self._upload_button = QtGui.QToolButton(self)
-        self._upload_button.setIcon(QtGui.QIcon('Document-save-as.svg'))
+        self._upload_button.setIcon(QtGui.QIcon(os.path.join(self._working_dir, 'Document-save-as.svg')))
         self._upload_button.setIconSize(QtCore.QSize(60, 60))
         self._upload_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self._upload_button.setText('&Upload')
@@ -137,7 +137,7 @@ class RecorderDialog(QtGui.QDialog):
         upload_skip_layout.addWidget(self._upload_button)
 
         self._skip_button = QtGui.QToolButton(self)
-        self._skip_button.setIcon(QtGui.QIcon('RedX.svg'))
+        self._skip_button.setIcon(QtGui.QIcon(os.path.join(self._working_dir, 'RedX.svg')))
         self._skip_button.setIconSize(QtCore.QSize(60, 60))
         self._skip_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self._skip_button.setText('S&kip')
