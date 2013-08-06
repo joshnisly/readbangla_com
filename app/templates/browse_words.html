@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/static/browse_words.css"/>
+
+{% for letter in letters %}
+<span class="LetterHeader Bangla"><a href="{% url app.views.words.browse letter %}">{{letter}}</a></span>
+{% endfor %}
+
+<table id="WordsTable">
+{% for word in words %}
+    <tr>
+        <td>
+            <a class="Bangla" href="{% url app.views.lookup.index word %}">{{word}}</a>
+        </td>
+        <td>
+            {% for def in word.definitions.all %}
+            ({{def.get_part_of_speech_display}}) {{def.english_word}}<br/>
+            {% endfor %}
+        </td>
+        <td>
+            {{word.added_by}}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}
