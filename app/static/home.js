@@ -63,8 +63,9 @@ function createDefSection(word, parent)
                     var audioDiv = titleElem.appendNewChild('DIV', '', 'AudioWrapper')
                                             .css('display', 'inline-block');
                     var audioTag = document.createElement('audio');
-                    var canPlay = audioTag.canPlayType && audioTag.canPlayType('audio/mpeg');
-                    if (canPlay)
+                    var canPlayMp3 = audioTag.canPlayType && audioTag.canPlayType('audio/mpeg');
+                    var canPlayOgg = audioTag.canPlayType && audioTag.canPlayType('audio/ogg');
+                    if (canPlayMp3 || canPlayOgg)
                     {
                         var audioIcon = audioDiv.appendNewChild('IMG', '', 'AudioIcon');
                         // Icon from https://www.iconfinder.com/icondetails/103711/32/louder_speaker_icon
@@ -73,10 +74,17 @@ function createDefSection(word, parent)
                             'height': '20px',
                             'margin-left': '10px'
                         });
-                        audioIcon.attr('xurl', word.audio_links[i]);
                         var audioElem = audioDiv.appendNewChild('AUDIO');
-                        audioElem.attr('src', word.audio_links[i]);
-                        audioElem.attr('type', 'audio/mpeg');
+                        if (canPlayOgg)
+                        {
+                            audioElem.attr('src', word.audio_links[i] + '?type=ogg');
+                            audioElem.attr('type', 'audio/ogg');
+                        }
+                        else
+                        {
+                            audioElem.attr('src', word.audio_links[i]);
+                            audioElem.attr('type', 'audio/mpeg');
+                        }
                     }
                     else
                     {
@@ -350,7 +358,9 @@ $(document).ready(function() {
 
         if (target.hasClass('AudioIcon'))
         {
-            $(event.target).closest('.AudioWrapper').find('AUDIO')[0].play();
+            var audioElem = $(event.target).closest('.AudioWrapper').find('AUDIO')[0];
+            audioElem.src = audioElem.src; // Resetting elem.src is necessary to repeat playback in Chrome.
+            audioElem.play();
             return;
         };
     });
