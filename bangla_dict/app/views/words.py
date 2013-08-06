@@ -24,7 +24,6 @@ def browse(request, starting_text=None):
     words_by_letter = groupby(wordstrs, lambda x: x.word[0])
 
     letter_words = words_by_letter[starting_text]
-    print letter_words[0].definitions.all()
     return helpers.run_template(request, 'browse_words', {
         'letters': sorted(words_by_letter.keys()),
         'words': sorted(letter_words, key=lambda x: x.word)
