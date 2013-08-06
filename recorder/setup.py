@@ -2,6 +2,7 @@
 
 import glob
 import os
+import PyQt4
 import shutil
 import sys
 
@@ -10,6 +11,7 @@ from distutils.cmd import Command
 import py2exe #pylint: disable=F0401
 
 if __name__ == '__main__':
+    pyqt_dir = os.path.dirname(PyQt4.__file__)
     setup(name = 'BanglaRecorder',
           version = '0.1',
           description = 'BanglaRecorder',
@@ -20,8 +22,11 @@ if __name__ == '__main__':
                                   'Tkconstants','Tkinter','tcl'],
                       'includes': ['sip', 'pyaudio'],
                       'dll_excludes': ['w9xpopen.exe', 'mswsock.dll'],
-                      'bundle_files': 1}},
-          data_files = [('', ['lame.exe', 'lame_enc.dll'])],
+                      }},
+          data_files = [
+              ('', glob.glob('*.svg')),
+              ('imageformats', [os.path.join(pyqt_dir, 'plugins', 'imageformats', 'qsvg4.dll')])
+          ],
           console = [{'script':'gui.py',
                       'dest_base':'BanglaRecorder',
                       #'icon_resources':[(1,'teamwrite.ico')],
