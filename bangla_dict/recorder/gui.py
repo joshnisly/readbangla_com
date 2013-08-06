@@ -44,7 +44,6 @@ class RecorderDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         self.setWindowTitle(self.tr('Bangla Recorder Client'))
 
-        self._is_playing = False
         self._working_dir = working_dir
         self._warn_on_list_change = True
 
@@ -63,6 +62,8 @@ class RecorderDialog(QtGui.QDialog):
 
         self._silence_level = int(self._settings.get_setting('threshold', 0))
         self._recorder.set_threshold(self._silence_level)
+
+        self._player = play.Player(self._temp_path, self)
 
         self._error_to_display = None
         self._status_text = None
@@ -170,6 +171,7 @@ class RecorderDialog(QtGui.QDialog):
     def reject(self):
         self._recorder.quit()
         self._uploader.quit()
+        self._player.quit()
         QtGui.QDialog.reject(self)
 
     def on_error(self, error):
@@ -199,6 +201,8 @@ class RecorderDialog(QtGui.QDialog):
             self._status_text = None
 
     def on_recording_finish(self):
+        time.sleep(0.5)
+        self._player.start()
         self._update_ui()
 
     def _download(self):
@@ -234,7 +238,7 @@ class RecorderDialog(QtGui.QDialog):
 
         self._cur_word_label.setText(self._get_cur_word())
 
-        text = '&Stop Recording' if self._recorder.is_recording() else '&Record'
+        text = '&Stop' if self._recorder.is_recording() else '&Record'
         self._record_button.setText(text)
         self._record_button.setCheckable(True)
         self._record_button.setChecked(self._recorder.is_recording())
@@ -244,6 +248,7 @@ class RecorderDialog(QtGui.QDialog):
             QtGui.QMessageBox.critical(self, 'Calibration required', 'You must calibrate the software before recording.')
             return
 
+        self._player.stop()
         self._recorder.start_stop()
         self._update_ui()
 
@@ -252,10 +257,10 @@ class RecorderDialog(QtGui.QDialog):
             QtGui.QMessageBox.critical(self, 'Error', 'Please record a word first.')
             return
 
-        self._is_playing = True
-        self._update_ui()
-        play.play_wav(self._temp_path)
-        self._is_playing = False
+        if self._recorder.is_recording():
+            return
+
+        self._player.start()
         self._update_ui()
 
     def _convert_and_upload(self):

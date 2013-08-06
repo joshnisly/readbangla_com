@@ -7,34 +7,21 @@ import os
 import Queue
 
 import helpers
+import worker_thread
 
 PATH = '/recordings/upload/'
 
-class _UploadThread(threading.Thread):
+class _UploadThread(worker_thread.WorkerThread):
     def __init__(self, message_queue, parent, host, port, username, password):
-        threading.Thread.__init__(self)
-        self._message_queue = message_queue
-        self._parent = parent
+        worker_thread.WorkerThread.__init__(self, message_queue, parent)
         self._host = host
         self._port = port
         self._username = username
         self._password = password
 
-    def run(self):
-        try:
-            while True:
-                message = self._message_queue.get()
-                if message is None:
-                    break
-
-                file_path, word_str = message
-                self._upload_file(file_path, word_str)
-                time.sleep(1)
-        except Exception, e:
-            print e
-            text = unicode(e.message)
-            self._parent.on_error(text)
-
+    def _process_event(self, event):
+        file_path, word_str = event
+        self._upload_file(file_path, word_str)
 
     def _upload_file(self, file_path, word_str):
         try:
