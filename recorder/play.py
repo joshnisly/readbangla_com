@@ -52,8 +52,12 @@ class PlayerThread(worker_thread.WorkerThread):
             self._stream.write(data)
 
     def _stop(self):
+        if not self._stream:
+            return
+
         self._stream.stop_stream()
         self._stream.close()
+        self._wav_file.close()
         self._is_playing = False
 
 class Player(object):

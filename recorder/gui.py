@@ -263,6 +263,9 @@ class RecorderDialog(QtGui.QDialog):
         self._update_ui()
 
     def _convert_and_upload(self):
+        if self._player.is_playing():
+            return
+
         try:
             if not os.path.exists(self._temp_path):
                 QtGui.QMessageBox.critical(self, 'Error', 'Please record a word before uploading.')
