@@ -93,6 +93,9 @@ class _RecordThread(worker_thread.WorkerThread):
     def _finish(self):
         assert self._is_recording
 
+        if not self._stream:
+            return
+
         sample_width = self._pyaudio.get_sample_size(FORMAT)
         self._stream.stop_stream()
         self._stream.close()
