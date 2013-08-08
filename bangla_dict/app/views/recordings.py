@@ -53,11 +53,11 @@ def upload(request):
 
     title = u'%s_%s' % (word, random_chars)
     WAV_PATH = os.path.join(AUDIO_DIR, 'wav', title + '.wav')
-    os.rename(TEMP_WAV_PATH, WAV_PATH)
+    os.rename(TEMP_WAV_PATH.encode('utf8'), WAV_PATH.encode('utf8'))
     MP3_PATH = os.path.join(AUDIO_DIR, 'mp3', title + '.mp3')
-    os.rename(TEMP_MP3_PATH, MP3_PATH)
+    os.rename(TEMP_MP3_PATH.encode('utf8'), MP3_PATH.encode('utf8'))
     OGG_PATH = os.path.join(AUDIO_DIR, 'ogg', title + '.ogg')
-    os.rename(TEMP_OGG_PATH, OGG_PATH)
+    os.rename(TEMP_OGG_PATH.encode('utf8'), OGG_PATH.encode('utf8'))
 
     recording = models.AudioRecording(word=word_obj,
                                       wav=WAV_PATH,
