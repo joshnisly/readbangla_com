@@ -18,15 +18,18 @@ def random(request):
     word = models.Word.objects.order_by('?')[0]
     return HttpResponseRedirect(reverse(lookup.index, args=[word.word]))
 
-def browse(request, starting_text=None):
-    starting_text = starting_text or u'\u0985'
+def browse(request, current_letter=None):
     wordstrs = models.Word.objects.select_related('definition')
     words_by_letter = groupby(wordstrs, lambda x: x.word[0])
 
-    letter_words = words_by_letter[starting_text]
+    if not current_letter in words_by_letter:
+        current_letter = u'\u0985'
+
+    letter_words = words_by_letter[current_letter]
     return helpers.run_template(request, 'browse_words', {
         'letters': sorted(words_by_letter.keys()),
-        'words': sorted(letter_words, key=lambda x: x.word)
+        'words': sorted(letter_words, key=lambda x: x.word),
+        'current_letter': current_letter
     })
 
 

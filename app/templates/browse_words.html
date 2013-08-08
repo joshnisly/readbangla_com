@@ -4,7 +4,11 @@
 <link rel="stylesheet" type="text/css" href="/static/browse_words.css"/>
 
 {% for letter in letters %}
+{% if letter == current_letter %}
+<span class="LetterHeader Bangla" style="font-weight: bold">{{letter}}</span>
+{% else %}
 <span class="LetterHeader Bangla"><a href="{% url app.views.words.browse letter %}">{{letter}}</a></span>
+{% endif %}
 {% endfor %}
 
 <table id="WordsTable">
@@ -16,6 +20,9 @@
         <td>
             {% for def in word.definitions.all %}
             ({{def.get_part_of_speech_display}}) {{def.english_word}}<br/>
+            {% if def.definition %}
+            Definition: {{def.definition}}<br/>
+            {% endif %}
             {% endfor %}
         </td>
         <td>
