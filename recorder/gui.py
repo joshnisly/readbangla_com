@@ -47,6 +47,7 @@ class RecorderDialog(QtGui.QDialog):
         self._working_dir = working_dir
         self._warn_on_list_change = True
 
+        self._num_completed_words = 0
         self._remaining_words = []
 
         self._settings = Settings(os.path.join(self._working_dir, 'settings.ini'))
@@ -145,8 +146,13 @@ class RecorderDialog(QtGui.QDialog):
         upload_skip_layout.addWidget(self._skip_button)
         recording_layout.addLayout(upload_skip_layout)
 
+        status_layout = QtGui.QHBoxLayout()
         self._status_label = QtGui.QLabel('Ready.')
-        full_layout.addWidget(self._status_label)
+        status_layout.addWidget(self._status_label)
+        self._progress_label = QtGui.QLabel('')
+        self._progress_label.setAlignment(QtCore.Qt.AlignRight)
+        status_layout.addWidget(self._progress_label)
+        full_layout.addLayout(status_layout)
 
         for button in [self._record_button, self._play_button, self._upload_button, self._skip_button]:
             font = button.font()
@@ -279,6 +285,8 @@ class RecorderDialog(QtGui.QDialog):
 
             self._uploader.add_item(target_path, cur_word)
 
+            self._num_completed_words += 1
+            self._progress_label.setText('%i word%s completed' % (self._num_completed_words, 's' if self._num_completed_words > 1 else ''))
             self._remaining_words.remove(cur_word)
             self._update_ui(True)
         except Exception, e:
@@ -286,6 +294,7 @@ class RecorderDialog(QtGui.QDialog):
 
     def _skip_word(self):
         self._remaining_words = self._remaining_words[1:]
+        os.unlink(self._temp_path)
         self._update_ui(True)
 
     def _calibrate(self):

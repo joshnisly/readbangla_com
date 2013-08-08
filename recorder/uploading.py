@@ -22,6 +22,7 @@ class _UploadThread(worker_thread.WorkerThread):
     def _process_event(self, event):
         file_path, word_str = event
         self._upload_file(file_path, word_str)
+        time.sleep(0.25)
 
     def _upload_file(self, file_path, word_str):
         try:
