@@ -119,8 +119,8 @@ def _run_edit_def_entrypoint(request, word_str, def_obj=None):
             def_args = {
                 'part_of_speech': def_data['part_of_speech'],
                 'english_word': def_data['english_word'],
-                'definition': def_data['definition'],
-                'notes': def_data['notes'],
+                'definition': word_helpers.simple_correct_spelling(def_data['definition']),
+                'notes': word_helpers.simple_correct_spelling(def_data['notes']),
             }
             if def_obj:
                 for key, value in def_args.items():
