@@ -280,6 +280,7 @@ function doAjaxLookup()
     if (isAscii(bangla) && !isEnglish)
         bangla = avro.parse(bangla);
 
+    bangla = simpleCorrectSpelling(bangla);
     $('#BanglaWord').val(bangla);
 
     // Clear any prior errors
