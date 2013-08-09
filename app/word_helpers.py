@@ -3,12 +3,19 @@ import re
 
 NO_PUNCTUATION_RE = re.compile('[|,;"\'-]')
 
+SIMPLE_SPELLING_CORRECTIONS = [
+    (u'\ufeff', ''), # UTF8 BOM
+    (u'\u0985\u09BE', u'\u0986'),
+    (u'\u09AF\u09BC', u'\u09DF'),
+    (u'\u09A1\u09BC', u'\u09DC'),
+]
+
 def simple_correct_spelling(word):
-    word = word.replace(u'\ufeff', '') # UTF8 BOM
-    word = word.replace(u'\u0985\u09BE', u'\u0986')
-    word = word.replace(u'\u09AF\u09BC', u'\u09DF')
-    word = word.replace(u'\u09A1\u09BC', u'\u09DC')
-    word = word.replace(u'\u0964', '') # | to end sentences
+    corrections = list(SIMPLE_SPELLING_CORRECTIONS)
+    corrections.append((u'\u0964', '')) # | to end sentences
+
+    for bad, good in corrections:
+        word = word.replace(bad, good)
 
     word = NO_PUNCTUATION_RE.sub(' ', word)
     return word.strip(' ')

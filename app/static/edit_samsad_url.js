@@ -17,7 +17,8 @@ function generateSamsadUrl(keyword, entriesOnly, exactMatch)
 function updateSamsad()
 {
     $('#Throbber').show();
-    var keyword = $('#Keyword').val();
+    var keyword = simpleCorrectSpelling($('#Keyword').val());
+    $('#Keyword').val(keyword);
     var entriesOnly = $('#EntriesOnly')[0].checked;
     var exactMatch = $('#ExactMatch')[0].checked;
 

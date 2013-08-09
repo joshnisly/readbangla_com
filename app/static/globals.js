@@ -29,6 +29,28 @@
     });
 })();
 
+(function() {
+    var g_aSpellingCorrections = null;
+    function simpleCorrectSpelling(word)
+    {
+        if (g_aSpellingCorrections === null)
+        {
+            g_aSpellingCorrections = JSON.parse($('#ServerData').attr('xSpellingCorrections'));
+            for (var i = 0; i < g_aSpellingCorrections; i++)
+                g_aSpellingCorrections[i][0] = new RegExp(g_aSpellingCorrections[i][0], 'g')
+        }
+
+        for (var i = 0; i < g_aSpellingCorrections.length; i++)
+        {
+            var correction = g_aSpellingCorrections[i];
+            word = word.replace(correction[0], correction[1])
+        }
+        return word;
+    }
+
+    window.simpleCorrectSpelling = simpleCorrectSpelling;
+})();
+
 function isAuthenticated()
 {
     return document.body.className.indexOf('Authenticated') != -1;

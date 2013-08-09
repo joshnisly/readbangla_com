@@ -9,6 +9,7 @@ import urllib
 
 from app import email_send
 from app import db_helpers
+from app import word_helpers
 
 def run_template(request, template_name, parms,
                 template_file_override=None,
@@ -33,14 +34,10 @@ def get_template_content(request, template_name, parms,
     parms.update({
         'name': template_name,
         'request': request,
+        'is_mobile': is_mobile,
+        'global_spelling_corrections': json.dumps(word_helpers.SIMPLE_SPELLING_CORRECTIONS)
     })
 
-    template_path = template_file_override or template_name
-    template = loader.get_template(template_path + '.' + template_ext)
-    parms = dict(parms)
-    parms['name'] = template_name
-    parms['request'] = request
-    parms['is_mobile'] = is_mobile
     context = RequestContext(request, parms)
     return template.render(context)
 
