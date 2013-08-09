@@ -341,7 +341,7 @@ $(document).ready(function() {
     $(document).bind('click', function(event) {
         var target = $(event.target);
 
-        if (isShowingBanglaChart && !target.closest('#BanglaChartWrapper').length)
+        if (isShowingBanglaChart && !target.closest('#BanglaChartWrapper').length && !target.closest('#BanglaWord').length)
             hideBanglaChart();
 
         var button = target.closest('BUTTON[xsamsadurl]');
