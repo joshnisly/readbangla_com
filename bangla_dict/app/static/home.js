@@ -51,7 +51,7 @@ function createDefSection(word, parent)
     if (word.edit_samsad_url)
     {
         var editSamsadLink = titleElem.appendNewChild('A', '', 'EditSamsadLink');
-        editSamsadLink.text('(edit)')
+        editSamsadLink.text('(edit link)')
         editSamsadLink.attr('href', word.edit_samsad_url);
 
         if (word.audio_links && word.audio_links.length)
