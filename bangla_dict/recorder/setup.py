@@ -38,7 +38,7 @@ if __name__ == '__main__':
               ('', glob.glob('*.svg')),
               ('imageformats', [os.path.join(pyqt_dir, 'plugins', 'imageformats', 'qsvg4.dll')])
           ],
-          console = [{'script':'gui.py',
+          windows = [{'script':'gui.py',
                       'dest_base':'BanglaRecorder',
                       #'icon_resources':[(1,'teamwrite.ico')],
                      }],
