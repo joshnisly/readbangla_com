@@ -32,6 +32,10 @@ function loadSamsadPane(url)
     var pane = $('#SamsadPane')[0];
     if (pane.src != url)
         $('#SamsadPane')[0].contentWindow.location.replace(url);
+    if (url == "about:blank")
+		$('#SamsadPane').css('border-left', '0');        
+	else
+		$('#SamsadPane').css('border-left', '1px solid #E0E0E0');
 };
 
 function buildLookupUrl(word)
