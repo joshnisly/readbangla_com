@@ -1,6 +1,7 @@
 # Django settings for bangla_dict project.
 
 import os
+import ConfigParser
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -14,14 +15,20 @@ PREFIX = os.path.dirname(os.path.abspath(__file__))
 
 MANAGERS = ADMINS
 
+def get_config_setting(section, key):
+    our_dir = os.path.dirname(os.path.abspath(__file__))
+    parser = ConfigParser.ConfigParser()
+    parser.read(os.path.join(our_dir, 'config.ini'))
+    return parser.get(section, key)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bangla_dict',
-        'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': 'billfrank',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'USER': get_config_setting('DB', 'Username'),
+        'PASSWORD': get_config_setting('DB', 'Password'),
+        'HOST': '',
+        'PORT': '',
     }
 }
 
