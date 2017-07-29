@@ -112,7 +112,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'bangla_dict.urls'
+ROOT_URLCONF = 'urls'
 
 AUTH_PROFILE_MODULE='app.UserProfile'
 

@@ -7,7 +7,7 @@ admin.autodiscover()
 import settings
 
 urlpatterns = patterns('',
-    (r'', include('bangla_dict.app.urls')),
+    (r'', include('app.urls')),
 
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': os.path.join(settings.PREFIX, 'app/static')}),
