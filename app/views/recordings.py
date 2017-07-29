@@ -86,7 +86,6 @@ def download_needed(request):
     words = [x.word for x in words]
     return HttpResponse('\n'.join(words), mimetype='text/plain')
 
-@login_required
 def audio_file(request, obj_id):
     recording = models.AudioRecording.objects.get(pk=obj_id)
     if request.GET.get('type') == 'ogg':

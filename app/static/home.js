@@ -60,53 +60,42 @@ function createDefSection(word, parent)
 
         if (word.audio_links && word.audio_links.length)
         {
-            if (isAuthenticated())
+            for (var i = 0; i < word.audio_links.length; i++)
             {
-                for (var i = 0; i < word.audio_links.length; i++)
+                var audioDiv = titleElem.appendNewChild('DIV', '', 'AudioWrapper')
+                                        .css('display', 'inline-block');
+                var audioTag = document.createElement('audio');
+                var canPlayMp3 = audioTag.canPlayType && audioTag.canPlayType('audio/mpeg');
+                var canPlayOgg = audioTag.canPlayType && audioTag.canPlayType('audio/ogg');
+                if (canPlayMp3 || canPlayOgg)
                 {
-                    var audioDiv = titleElem.appendNewChild('DIV', '', 'AudioWrapper')
-                                            .css('display', 'inline-block');
-                    var audioTag = document.createElement('audio');
-                    var canPlayMp3 = audioTag.canPlayType && audioTag.canPlayType('audio/mpeg');
-                    var canPlayOgg = audioTag.canPlayType && audioTag.canPlayType('audio/ogg');
-                    if (canPlayMp3 || canPlayOgg)
+                    var audioIcon = audioDiv.appendNewChild('IMG', '', 'AudioIcon');
+                    // Icon from https://www.iconfinder.com/icondetails/103711/32/louder_speaker_icon
+                    audioIcon.attr('src', '/static/speaker.png');
+                    audioIcon.css({
+                        'height': '20px',
+                        'margin-left': '10px'
+                    });
+                    var audioElem = audioDiv.appendNewChild('AUDIO');
+                    if (canPlayOgg)
                     {
-                        var audioIcon = audioDiv.appendNewChild('IMG', '', 'AudioIcon');
-                        // Icon from https://www.iconfinder.com/icondetails/103711/32/louder_speaker_icon
-                        audioIcon.attr('src', '/static/speaker.png');
-                        audioIcon.css({
-                            'height': '20px',
-                            'margin-left': '10px'
-                        });
-                        var audioElem = audioDiv.appendNewChild('AUDIO');
-                        if (canPlayOgg)
-                        {
-                            audioElem.attr('src', word.audio_links[i] + '?type=ogg');
-                            audioElem.attr('type', 'audio/ogg');
-                        }
-                        else
-                        {
-                            audioElem.attr('src', word.audio_links[i]);
-                            audioElem.attr('type', 'audio/mpeg');
-                        }
+                        audioElem.attr('src', word.audio_links[i] + '?type=ogg');
+                        audioElem.attr('type', 'audio/ogg');
                     }
                     else
                     {
-                        // Fall back to using Flash.
-                        var audioID = word.word + i;
-                        var flashWrapper = audioDiv.appendNewChild('SPAN', audioID);
-                        audioDiv.css('margin-left', '10px');
-                        AudioPlayer.embed(audioID, {soundFile: word.audio_links[i]});
+                        audioElem.attr('src', word.audio_links[i]);
+                        audioElem.attr('type', 'audio/mpeg');
                     }
                 }
-            }
-            else
-            {
-                var textElem = titleElem.appendNewChild('SPAN').text('(Log in to listen to recordings of this word.)');
-                textElem.css({
-                    'font-size': '10px',
-                    'margin-left': '10px'
-                });
+                else
+                {
+                    // Fall back to using Flash.
+                    var audioID = word.word + i;
+                    var flashWrapper = audioDiv.appendNewChild('SPAN', audioID);
+                    audioDiv.css('margin-left', '10px');
+                    AudioPlayer.embed(audioID, {soundFile: word.audio_links[i]});
+                }
             }
         }
     }
