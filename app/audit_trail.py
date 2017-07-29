@@ -81,10 +81,11 @@ def _format_timedelta(td):
     hours = int(td.seconds / 60 / 60)
     minutes = int((td.seconds % (60 * 60)) / 60)
     seconds = int(td.seconds % 60)
+    days = td.days - (years * 365)
     
     descs = [
         _get_desc('year', years),
-        _get_desc('day', td.days),
+        _get_desc('day', days),
         _get_desc('hour', hours),
         _get_desc('minute', minutes),
         _get_desc('second', seconds)
